@@ -1,5 +1,6 @@
 package iec62056
 
+// RequestMessage
 // DataMessage type contains the read meter information.
 type DataMessage struct {
 	MmanufacturerID string

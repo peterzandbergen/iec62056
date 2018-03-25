@@ -6,6 +6,41 @@ import (
 	"io"
 )
 
+type RequestMessage struct {
+	deviceAddress string
+}
+
+func SerializeRequestMessage(w io.Writer, rm RequestMessage) (int, error) {
+	var msg string
+
+	msg = string(StartChar) +
+		string(RequestCommandChar) +
+		rm.deviceAddress +
+		string(EndChar) +
+		string(CR) +
+		string(LF)
+	return w.Write([]byte(msg))
+}
+
+// IdentifcationMessage type is the message from the meter in response to the read command.
+type IdentifcationMessage struct {
+	mID            string
+	baudID         byte
+	identification string
+}
+
+// AcknowledgeMessage type needs documentation. TODO:
+type AcknowledgeMessage struct {
+	pcc ProtocolControlCharacter
+	// baudrate
+	modeCondtrol AcknowledgeMode
+}
+
+type DataMessage struct {
+	datasets *[]DataSet
+	bcc      Bcc
+}
+
 type DataSet struct {
 	address string
 	value   string
@@ -14,12 +49,11 @@ type DataSet struct {
 
 type Bcc byte
 
-func (bcc *Bcc) Digest(b byte) {
-	*bcc = (*bcc) ^ Bcc(b)
+func (bcc *Bcc) Digest(b ...byte) {
+	for _, i := range b {
+		*bcc = (*bcc) ^ Bcc(i)
+	}
 }
-
-// IdentifcationMessage type is the message from the meter in response to the read command.
-type IdentifcationMessage struct{}
 
 // ProtocolControlCharacter
 type ProtocolControlCharacter byte
@@ -31,12 +65,29 @@ const (
 	ProtControlSecondary = ProtocolControlCharacter(byte('1'))
 )
 
-// AcknowledgeMessage type needs documentation. TODO:
-type AcknowledgeMessage struct {
-	ProtocolControlCharacter
-}
-
 type AcknowledgeMode byte
+
+type BaudrateIdentification byte
+
+func Baudrate(br BaudrateIdentification) int {
+	switch rune(br) {
+	case '0':
+		return 300
+	case 'A', '1':
+		return 600
+	case 'B', '2':
+		return 1200
+	case 'C', '3':
+		return 2400
+	case 'D', '4':
+		return 4800
+	case 'E', '5':
+		return 9600
+	case 'F', '6':
+		return 19200
+	}
+	return 0
+}
 
 const (
 	AckModeDataReadOut = AcknowledgeMode(byte('0'))
@@ -48,13 +99,16 @@ const (
 )
 
 const (
-	CR                = byte(13)
-	LF                = byte(10)
-	FrontBoundaryChar = byte('(')
-	RearBoundaryChar  = byte(')')
-	UnitSeparator     = byte('*')
-	StartChar         = byte('/')
-	EndChar           = byte('!')
+	CR                 = byte(0x0D)
+	LF                 = byte(0x0A)
+	FrontBoundaryChar  = byte('(')
+	RearBoundaryChar   = byte(')')
+	UnitSeparator      = byte('*')
+	StartChar          = byte('/')
+	RequestCommandChar = byte('?')
+	EndChar            = byte('!')
+	EtxChar            = byte(0x03)
+	SeqDelChar         = byte('\\')
 )
 
 func ValidAddresChar(b byte) bool {
@@ -98,17 +152,103 @@ func AcknowledgeModeFromByte(a byte) AcknowledgeMode {
 }
 
 var (
-	ErrCRFound           = errors.New("End CR found")
-	ErrNotImplementedYet = errors.New("Not implemented yet.")
-	ErrFormatError       = errors.New("Format error.")
-	ErrFormatNoChars     = errors.New("No chars found.")
-	ErrEmptyDataLine     = errors.New("Empty data line found.")
-	ErrUnexpectedEOF     = errors.New("Unexpected end of file.")
-	ErrNoBlockEndChar    = errors.New("No block end char found.")
+	ErrCRFound               = errors.New("End CR found")
+	ErrNotImplementedYet     = errors.New("not implemented yet")
+	ErrFormatError           = errors.New("format error")
+	ErrFormatNoChars         = errors.New("no chars found")
+	ErrEmptyDataLine         = errors.New("empty data line found")
+	ErrUnexpectedEOF         = errors.New("unexpected end of file")
+	ErrNoBlockEndChar        = errors.New("no block end char found")
+	ErrNoStartChar           = errors.New("no StartChar found")
+	ErrAddressTooLong        = errors.New("field too long")
+	ErrValueTooLong          = errors.New("field too long")
+	ErrUnitTooLong           = errors.New("field too long")
+	ErrIdentificationTooLong = errors.New("identification field too long")
 )
 
-func ParseDataBlock(r *bufio.Reader, bcc *Bcc) ([]DataSet, error) {
+func ParseDataMessage(r *bufio.Reader) (*DataMessage, error) {
 	var b byte
+	var err error
+	var res *[]DataSet
+	var bcc = Bcc(0)
+
+	b, err = r.ReadByte()
+	if err != nil {
+		return nil, ErrUnexpectedEOF
+	}
+	if b != StartChar {
+		return nil, ErrNoStartChar
+	}
+	// Get the datasets.
+	res, err = ParseDataBlock(r, &bcc)
+	if err != nil {
+		return nil, err
+	}
+	_, err = ParseDataMessageEnd(r, &bcc)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DataMessage{
+		datasets: res,
+		bcc:      bcc,
+	}, nil
+}
+
+// ParseDataMessageEnd parses the end of a datamessage.
+// ! CR LF ETX BCC
+func ParseDataMessageEnd(r *bufio.Reader, bcc *Bcc) (*DataMessage, error) {
+	var b byte
+	var err error
+
+	b, err = r.ReadByte()
+	if err != nil {
+		return nil, err
+	}
+	if b != EndChar {
+		return nil, ErrFormatError
+	}
+	bcc.Digest(b)
+
+	b, err = r.ReadByte()
+	if err != nil {
+		return nil, err
+	}
+	if b != CR {
+		return nil, ErrFormatError
+	}
+	bcc.Digest(b)
+
+	b, err = r.ReadByte()
+	if err != nil {
+		return nil, err
+	}
+	if b != LF {
+		return nil, ErrFormatError
+	}
+	bcc.Digest(b)
+
+	b, err = r.ReadByte()
+	if err != nil {
+		return nil, err
+	}
+	if b != EtxChar {
+		return nil, ErrFormatError
+	}
+	bcc.Digest(b)
+
+	b, err = r.ReadByte()
+	if err != nil {
+		return nil, err
+	}
+
+	return &DataMessage{
+		bcc: *bcc,
+	}, nil
+}
+
+// ParseDataBlock parses til no valid data lines can be parsed.
+func ParseDataBlock(r *bufio.Reader, bcc *Bcc) (*[]DataSet, error) {
 	var err error
 	var res []DataSet
 
@@ -116,20 +256,12 @@ func ParseDataBlock(r *bufio.Reader, bcc *Bcc) ([]DataSet, error) {
 		var ds []DataSet
 		ds, err = ParseDataLine(r, bcc)
 		if err != nil {
-			return nil, err
-		}
-		if len(ds) <= 0 {
-			return nil, ErrEmptyDataLine
+			if len(res) <= 0 {
+				return nil, ErrEmptyDataLine
+			}
+			return &res, nil
 		}
 		res = append(res, ds...)
-		b, err = r.ReadByte()
-		if err != nil {
-			return nil, ErrUnexpectedEOF
-		}
-		if b == EndChar {
-			r.UnreadByte()
-			return res, nil
-		}
 	}
 }
 
@@ -160,12 +292,11 @@ func ParseDataLine(r *bufio.Reader, bcc *Bcc) ([]DataSet, error) {
 			if err == nil && b == LF {
 				bcc.Digest(b)
 				return res, nil
-			} else {
-				return nil, ErrFormatError
 			}
-		} else {
-			r.UnreadByte()
+			// Error, CR not followed by LF
+			return nil, ErrFormatError
 		}
+		r.UnreadByte()
 	}
 }
 
@@ -202,6 +333,9 @@ ScanAddress:
 				return nil, ErrFormatError
 			}
 			v = append(v, b)
+			if len(v) > 16 {
+				return nil, ErrAddressTooLong
+			}
 		}
 	}
 	// Address read.
@@ -224,6 +358,9 @@ ScanValue:
 				return nil, ErrFormatError
 			}
 			v = append(v, b)
+			if len(v) > 32 {
+				return nil, ErrValueTooLong
+			}
 		}
 	}
 	res.value = string(v)
@@ -248,12 +385,86 @@ ScanUnit:
 				return nil, ErrFormatError
 			}
 			v = append(v, b)
+			if len(v) > 16 {
+				return nil, ErrUnitTooLong
+			}
 		}
 	}
 	res.unit = string(v)
 	return res, nil
 }
 
-func ParseIdentificationMessage(r io.Reader) (*IdentifcationMessage, error) {
-	return nil, ErrNotImplementedYet
+func ParseIdentificationMessage(r *bufio.Reader) (*IdentifcationMessage, error) {
+	var b byte
+	var err error
+	var res = &IdentifcationMessage{}
+
+	b, err = r.ReadByte()
+	if err != nil {
+		return nil, ErrFormatError
+	}
+	if b != StartChar {
+		return nil, ErrFormatError
+	}
+
+	var id [3]byte
+	var i int
+	// mID
+	i, err = r.Read(id[:])
+	if err != nil && i != 3 {
+		return nil, ErrFormatError
+	}
+	res.mID = string(id[:])
+
+	// baudrate mode
+	b, err = r.ReadByte()
+	if err != nil {
+		return nil, ErrFormatError
+	}
+	if Baudrate(BaudrateIdentification(b)) == 0 {
+		return nil, ErrFormatError
+	}
+	res.baudID = b
+
+	var vt [33]byte
+	var v = vt[:0]
+
+	// \W or not
+	b, err = r.ReadByte()
+	if err != nil {
+		return nil, ErrFormatError
+	}
+	if b == SeqDelChar {
+		// Read a W
+		b, err = r.ReadByte()
+		if err != nil || b != byte('W') {
+			return nil, ErrFormatError
+		}
+	} else {
+		v = append(v, b)
+	}
+
+ScanIdenfication:
+	for {
+		b, err = r.ReadByte()
+		if err != nil {
+			return nil, ErrFormatError
+		}
+		switch {
+		case b == CR:
+			break ScanIdenfication
+		default:
+			v = append(v, b)
+			if len(v) > 16 {
+				return nil, ErrIdentificationTooLong
+			}
+		}
+	}
+	res.identification = string(v)
+	// Test if the last char is LF
+	b, err = r.ReadByte()
+	if err != nil || b != LF {
+		return nil, ErrFormatError
+	}
+	return res, nil
 }
