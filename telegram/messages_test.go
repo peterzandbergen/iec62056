@@ -365,3 +365,16 @@ func TestParstIdenticationMessageBad(t *testing.T) {
 		t.Fatal("Expected error.")
 	}
 }
+
+const identicationMessageTooLong = string(StartChar) +
+	"MAN" +
+	"A" +
+	"12345678901234567" +
+	string(CR) + string(LF)
+
+func TestParstIdenticationMessageTooLong(t *testing.T) {
+	_, err := ParseIdentificationMessage(bufio.NewReader(bytes.NewBufferString(identicationMessageTooLong)))
+	if err == nil {
+		t.Fatal("Expected error.")
+	}
+}

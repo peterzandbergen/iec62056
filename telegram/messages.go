@@ -399,6 +399,7 @@ func ParseIdentificationMessage(r *bufio.Reader) (*IdentifcationMessage, error) 
 	var err error
 	var res = &IdentifcationMessage{}
 
+	// StartChar
 	b, err = r.ReadByte()
 	if err != nil {
 		return nil, ErrFormatError
@@ -407,6 +408,7 @@ func ParseIdentificationMessage(r *bufio.Reader) (*IdentifcationMessage, error) 
 		return nil, ErrFormatError
 	}
 
+	// Manufacturer ID
 	var id [3]byte
 	var i int
 	// mID
@@ -460,6 +462,7 @@ ScanIdenfication:
 			}
 		}
 	}
+
 	res.identification = string(v)
 	// Test if the last char is LF
 	b, err = r.ReadByte()
