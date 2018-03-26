@@ -36,7 +36,7 @@ func TestPortOpen(t *testing.T) {
 	defer p.Close()
 }
 
-func TestReadIdenticationMessage(t *testing.T) {
+func TestReadDataMessage(t *testing.T) {
 	p := New(newDefaulSettings())
 
 	err := p.Open("/dev/ttyUSB0")
@@ -55,12 +55,12 @@ func TestReadIdenticationMessage(t *testing.T) {
 		t.Fatalf("error sending request message: %s", err.Error())
 	}
 
-	// Wait for the Identification Message.
-	im, err := telegram.ParseIdentificationMessage(p.r)
+	// Wait for the Data Message.
+	dm, err := telegram.ParseDataMessage(p.r)
 	if err != nil {
 		t.Fatalf("error receiving idenfication message: %s", err.Error())
 	}
-	t.Logf("Identicatin message: %s", im.String())
+	t.Logf("Identicatin message: %s", dm.String())
 }
 
 func TestReadResponse(t *testing.T) {
@@ -83,11 +83,12 @@ func TestReadResponse(t *testing.T) {
 	}
 
 	// Wait for the Identification Message.
-	var buf [200]byte
-	r, err := p.port.Read(buf[:])
+	var buf = make([]byte, 100)
+
+	b, err := p.r.ReadByte()
 	if err != nil {
 		t.Fatalf("Error reading from port: %s", err.Error())
 	}
-	t.Logf("Bytes: '%s'", string(buf[:r]))
+	t.Logf("Bytes: '%s'", string(rune(b)))
 
 }

@@ -46,6 +46,10 @@ type DataMessage struct {
 	bcc      Bcc
 }
 
+func (d *DataMessage) String() string {
+	return fmt.Sprintf("%+v", *d)
+}
+
 type DataSet struct {
 	address string
 	value   string
