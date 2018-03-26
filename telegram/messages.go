@@ -3,6 +3,7 @@ package telegram
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"io"
 )
 
@@ -27,6 +28,10 @@ type IdentifcationMessage struct {
 	mID            string
 	baudID         byte
 	identification string
+}
+
+func (i *IdentifcationMessage) String() string {
+	return fmt.Sprintf("mID: %s, baudID: %c, identification: %s", i.mID, i.baudID, i.identification)
 }
 
 // AcknowledgeMessage type needs documentation. TODO:

@@ -114,5 +114,5 @@ func (p *Port) Read() (*DataMessage, error) {
 	}
 	// Send ack.
 
-	return nil, ErrPortOpenFailed
+	return nil, nil
 }

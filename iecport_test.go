@@ -2,6 +2,8 @@ package iec62056
 
 import (
 	"testing"
+
+	"github.com/peterzandbergen/iec62056/telegram"
 )
 
 func TestNewPort(t *testing.T) {
@@ -32,4 +34,31 @@ func TestPortOpen(t *testing.T) {
 		t.Fatalf("Error opening port: %s", err.Error())
 	}
 	defer p.Close()
+}
+
+func TestReadIdenticationMessage(t *testing.T) {
+	p := New(newDefaulSettings())
+
+	err := p.Open("/dev/ttyUSB0")
+	if err != nil {
+		t.Fatalf("Error opening port: %s", err.Error())
+	}
+	defer p.Close()
+
+	// Set the baudrate to 300
+	p.mode.BaudRate = p.InitialBaudRateModeABC
+	p.port.SetMode(p.mode)
+
+	// Send a request command.
+	_, err = telegram.SerializeRequestMessage(p.port, telegram.RequestMessage{})
+	if err != nil {
+		t.Fatalf("error sending request message: %s", err.Error())
+	}
+
+	// Wait for the Identification Message.
+	im, err := telegram.ParseIdentificationMessage(p.r)
+	if err != nil {
+		t.Fatalf("error receiving idenfication message: %s", err.Error())
+	}
+	t.Logf("Identicatin message: %s", im.String())
 }
