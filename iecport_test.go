@@ -6,10 +6,7 @@ import (
 
 func TestNewPort(t *testing.T) {
 	var settings = newDefaulSettings()
-	port, err := New(settings)
-	if err != nil {
-		t.Fatalf("Error creating port: %s", err.Error())
-	}
+	port := New(settings)
 	if port.BaudRateChangeDelay != 0 {
 		t.Errorf("port.BaudRateChangeDelay, expected %d, received %d", 0, port.BaudRateChangeDelay)
 	}
@@ -27,4 +24,12 @@ func TestNewPort(t *testing.T) {
 	}
 }
 
-func 
+func TestPortOpen(t *testing.T) {
+	p := New(newDefaulSettings())
+
+	err := p.Open("/dev/ttyUSB0")
+	if err != nil {
+		t.Fatalf("Error opening port: %s", err.Error())
+	}
+	defer p.Close()
+}

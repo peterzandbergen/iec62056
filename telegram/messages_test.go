@@ -330,15 +330,15 @@ func TestParstIdenticationMessage(t *testing.T) {
 	}
 }
 
-const identicationMessageBsW = string(StartChar) +
+const identicationMessageBackslashW = string(StartChar) +
 	"MAN" +
 	"A" +
 	"\\W" +
 	"identification" +
 	string(CR) + string(LF)
 
-func TestParstIdenticationMessageBsW(t *testing.T) {
-	im, err := ParseIdentificationMessage(bufio.NewReader(bytes.NewBufferString(identicationMessageBsW)))
+func TestParstIdenticationMessageBackslashW(t *testing.T) {
+	im, err := ParseIdentificationMessage(bufio.NewReader(bytes.NewBufferString(identicationMessageBackslashW)))
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
