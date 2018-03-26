@@ -39,6 +39,37 @@ func TestPortOpen(t *testing.T) {
 	defer p.Close()
 }
 
+func TestReadIdentificationMessage(t *testing.T) {
+	p := New(newDefaulSettings())
+
+	err := p.Open("/dev/ttyUSB0")
+	if err != nil {
+		t.Fatalf("Error opening port: %s", err.Error())
+	}
+	defer p.Close()
+
+	// Set the baudrate to 300
+	p.mode.BaudRate = p.InitialBaudRateModeABC
+	p.port.SetMode(p.mode)
+
+	time.Sleep(time.Second)
+
+	// Send a request command.
+	_, err = telegram.SerializeRequestMessage(p.port, telegram.RequestMessage{})
+	if err != nil {
+		t.Fatalf("error sending request message: %s", err.Error())
+	}
+
+	// time.Sleep(time.Second)
+
+	// Wait for the Data Message.
+	dm, err := telegram.ParseIdentificationMessage(p.r)
+	if err != nil {
+		t.Fatalf("error receiving idenfication message: %s", err.Error())
+	}
+	t.Logf("Identicatin message: %s", dm.String())
+}
+
 func TestReadDataMessage(t *testing.T) {
 	p := New(newDefaulSettings())
 
