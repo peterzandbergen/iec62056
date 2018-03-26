@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"go.bug.st/serial.v1"
+
 	"github.com/peterzandbergen/iec62056/telegram"
 )
 
@@ -137,4 +139,28 @@ func TestReadResponse(t *testing.T) {
 	}
 	t.Logf("Bytes: '%s'", string(rune(b)))
 
+}
+
+func TestRawPort(t *testing.T) {
+	p, err := serial.Open("/dev/ttyUSB0",
+		&serial.Mode{
+			BaudRate: 300,
+			DataBits: 7,
+			Parity:   serial.EvenParity,
+			StopBits: 1,
+		})
+	if err != nil {
+		t.Fatalf("error opening port: %s", err.Error())
+	}
+	defer p.Close()
+	p.ResetInputBuffer()
+	p.ResetOutputBuffer()
+	p.Write([]byte("/?!\r\n"))
+
+	var buf = make([]byte, 1000)
+	n, err := p.Read(buf)
+	if err != nil {
+		t.Fatalf("error opening port: %s", err.Error())
+	}
+	t.Logf("response: %s", string(buf[:n]))
 }
