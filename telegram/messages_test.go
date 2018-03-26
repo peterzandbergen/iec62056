@@ -378,3 +378,11 @@ func TestParstIdenticationMessageTooLong(t *testing.T) {
 		t.Fatal("Expected error.")
 	}
 }
+
+func TestRequestMessage(t *testing.T) {
+	b := &bytes.Buffer{}
+	SerializeRequestMessage(b, RequestMessage{})
+	if b.String() != "/?!\r\n" {
+		t.Fatalf("bad request message: b.String()")
+	}
+}

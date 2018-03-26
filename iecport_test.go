@@ -197,3 +197,30 @@ func TestRawPort(t *testing.T) {
 	}
 	t.Logf("response: %s", string(buf[:n]))
 }
+
+func TestRawPortSerReq(t *testing.T) {
+	p, err := serial.Open("/dev/ttyUSB0",
+		&serial.Mode{
+			BaudRate: 300,
+			DataBits: 7,
+			Parity:   serial.EvenParity,
+			StopBits: serial.OneStopBit,
+		})
+	if err != nil {
+		t.Fatalf("error opening port: %s", err.Error())
+	}
+	defer p.Close()
+	p.ResetInputBuffer()
+	p.ResetOutputBuffer()
+
+	// p.Write([]byte("/?!\r\n"))
+	telegram.SerializeRequestMessage(p, telegram.RequestMessage{})
+
+	time.Sleep(time.Second)
+	var buf = make([]byte, 1000)
+	n, err := p.Read(buf)
+	if err != nil {
+		t.Fatalf("error opening port: %s", err.Error())
+	}
+	t.Logf("response: %s", string(buf[:n]))
+}
