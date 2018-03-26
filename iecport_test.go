@@ -95,43 +95,43 @@ func TestReadResponse(t *testing.T) {
 	}
 	t.Logf("Bytes: '%s'", string(rune(b)))
 
-	b, err := p.r.ReadByte()
+	b, err = p.r.ReadByte()
 	if err != nil {
 		t.Fatalf("Error reading from port: %s", err.Error())
 	}
 	t.Logf("Bytes: '%s'", string(rune(b)))
 
-	b, err := p.r.ReadByte()
+	b, err = p.r.ReadByte()
 	if err != nil {
 		t.Fatalf("Error reading from port: %s", err.Error())
 	}
 	t.Logf("Bytes: '%s'", string(rune(b)))
 
-	b, err := p.r.ReadByte()
+	b, err = p.r.ReadByte()
 	if err != nil {
 		t.Fatalf("Error reading from port: %s", err.Error())
 	}
 	t.Logf("Bytes: '%s'", string(rune(b)))
 
-	b, err := p.r.ReadByte()
+	b, err = p.r.ReadByte()
 	if err != nil {
 		t.Fatalf("Error reading from port: %s", err.Error())
 	}
 	t.Logf("Bytes: '%s'", string(rune(b)))
 
-	b, err := p.r.ReadByte()
+	b, err = p.r.ReadByte()
 	if err != nil {
 		t.Fatalf("Error reading from port: %s", err.Error())
 	}
 	t.Logf("Bytes: '%s'", string(rune(b)))
 
-	b, err := p.r.ReadByte()
+	b, err = p.r.ReadByte()
 	if err != nil {
 		t.Fatalf("Error reading from port: %s", err.Error())
 	}
 	t.Logf("Bytes: '%s'", string(rune(b)))
 
-	b, err := p.r.ReadByte()
+	b, err = p.r.ReadByte()
 	if err != nil {
 		t.Fatalf("Error reading from port: %s", err.Error())
 	}
