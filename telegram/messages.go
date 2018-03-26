@@ -181,12 +181,15 @@ func ParseDataMessage(r *bufio.Reader) (*DataMessage, error) {
 	var res *[]DataSet
 	var bcc = Bcc(0)
 
-	b, err = r.ReadByte()
-	if err != nil {
-		return nil, ErrUnexpectedEOF
-	}
-	if b != StartChar {
-		return nil, ErrNoStartChar
+	// Consume all bytes till a start of message is found.
+	for {
+		b, err = r.ReadByte()
+		if err != nil {
+			return nil, ErrUnexpectedEOF
+		}
+		if b == StartChar {
+			break
+		}
 	}
 	// Get the datasets.
 	res, err = ParseDataBlock(r, &bcc)
