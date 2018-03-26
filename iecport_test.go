@@ -155,8 +155,10 @@ func TestRawPort(t *testing.T) {
 	defer p.Close()
 	p.ResetInputBuffer()
 	p.ResetOutputBuffer()
+
 	p.Write([]byte("/?!\r\n"))
 
+	time.Sleep(time.Second)
 	var buf = make([]byte, 1000)
 	n, err := p.Read(buf)
 	if err != nil {
