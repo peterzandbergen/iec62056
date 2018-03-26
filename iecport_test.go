@@ -82,9 +82,6 @@ func TestReadResponse(t *testing.T) {
 		t.Fatalf("error sending request message: %s", err.Error())
 	}
 
-	// Wait for the Identification Message.
-	var buf = make([]byte, 100)
-
 	b, err := p.r.ReadByte()
 	if err != nil {
 		t.Fatalf("Error reading from port: %s", err.Error())
