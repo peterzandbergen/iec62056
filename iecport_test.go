@@ -147,7 +147,7 @@ func TestRawPort(t *testing.T) {
 			BaudRate: 300,
 			DataBits: 7,
 			Parity:   serial.EvenParity,
-			StopBits: 1,
+			StopBits: serial.OneStopBit,
 		})
 	if err != nil {
 		t.Fatalf("error opening port: %s", err.Error())
