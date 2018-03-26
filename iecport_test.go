@@ -2,6 +2,7 @@ package iec62056
 
 import (
 	"testing"
+	"time"
 
 	"github.com/peterzandbergen/iec62056/telegram"
 )
@@ -49,11 +50,15 @@ func TestReadDataMessage(t *testing.T) {
 	p.mode.BaudRate = p.InitialBaudRateModeABC
 	p.port.SetMode(p.mode)
 
+	time.Sleep(time.Second)
+
 	// Send a request command.
 	_, err = telegram.SerializeRequestMessage(p.port, telegram.RequestMessage{})
 	if err != nil {
 		t.Fatalf("error sending request message: %s", err.Error())
 	}
+
+	time.Sleep(time.Second)
 
 	// Wait for the Data Message.
 	dm, err := telegram.ParseDataMessage(p.r)
