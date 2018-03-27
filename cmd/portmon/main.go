@@ -25,6 +25,10 @@ func readCommands(wg *sync.WaitGroup, in io.Reader, p io.Writer) {
 		case 'r', 'R':
 			// Send request.
 			telegram.SerializeRequestMessage(p, telegram.RequestMessage{})
+		case 'a', 'A':
+			// Send request.
+			ack := "\x06\x00\x00\x00\r\n"
+			p.Write([]byte(ack))
 		case 'q', 'Q':
 			wg.Done()
 			return
