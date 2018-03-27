@@ -54,7 +54,7 @@ func main() {
 
 	p, err := serial.Open("/dev/ttyUSB0",
 		&serial.Mode{
-			BaudRate: 300,
+			BaudRate: 9600,
 			DataBits: 7,
 			Parity:   serial.EvenParity,
 			StopBits: serial.OneStopBit,
