@@ -116,6 +116,7 @@ const (
 	StartChar          = byte('/')
 	RequestCommandChar = byte('?')
 	EndChar            = byte('!')
+	StxChar            = byte(0x02)
 	EtxChar            = byte(0x03)
 	SeqDelChar         = byte('\\')
 )
@@ -187,7 +188,7 @@ func ParseDataMessage(r *bufio.Reader) (*DataMessage, error) {
 		if err != nil {
 			return nil, ErrUnexpectedEOF
 		}
-		if b == StartChar {
+		if b == StxChar {
 			break
 		}
 	}
