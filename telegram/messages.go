@@ -225,7 +225,7 @@ func ParseDataMessageEnd(r *bufio.Reader, bcc *Bcc) (*DataMessage, error) {
 		return nil, err
 	}
 	if b != EndChar {
-		log.Println("ParseDataMessageEnd, error parsing EndChar")
+		log.Printf("ParseDataMessageEnd, error parsing EndChar, found %d", b)
 		return nil, ErrFormatError
 	}
 	bcc.Digest(b)
