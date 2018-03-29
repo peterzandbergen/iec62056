@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -49,7 +50,10 @@ type DataMessage struct {
 }
 
 func (d *DataMessage) String() string {
-	return fmt.Sprintf("%+v", *d)
+	b := &bytes.Buffer{}
+
+	fmt.Fprintf(b, "bcc: %d %+v", d.bcc, *d.datasets)
+	return b.String()
 }
 
 type DataSet struct {

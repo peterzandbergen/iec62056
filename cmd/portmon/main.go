@@ -52,7 +52,7 @@ func writeResponses(wg *sync.WaitGroup, in *bufio.Reader, out io.Writer) {
 			fmt.Fprintf(out, "Error receiving data message: %s\n", err.Error())
 			continue
 		}
-		fmt.Fprintf(out, "%+v\n\n", *dm)
+		fmt.Fprint(out, dm.String())
 	}
 }
 
