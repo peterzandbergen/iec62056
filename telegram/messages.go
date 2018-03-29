@@ -423,11 +423,13 @@ func ParseIdentificationMessage(r *bufio.Reader) (*IdentifcationMessage, error) 
 
 	// Manufacturer ID
 	var id [3]byte
-	var i int
 	// mID
-	i, err = r.Read(id[:])
-	if err != nil && i != 3 {
-		return nil, ErrFormatError
+	for i := 0; i < len(id); i++ {
+		b, err = r.ReadByte()
+		if err != nil {
+			return nil, ErrFormatError
+		}
+		id[i] = b
 	}
 	res.mID = string(id[:])
 
