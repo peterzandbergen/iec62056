@@ -46,24 +46,13 @@ func writeResponses(wg *sync.WaitGroup, in *bufio.Reader, out io.Writer) {
 			fmt.Fprintf(out, "Error receiving ID message: %s\n", err.Error())
 			continue
 		}
-<<<<<<< HEAD
-		fmt.Fprintf(out, " %+v ", buf[:n])
-		// replace CR with space.
-		for i := 0; i < n; i++ {
-			if buf[i] == 0xd {
-				buf[i] = byte(' ')
-			}
-		}
-		n, err = out.Write(buf[:n])
-=======
-		fmt.Fprintf(out, "%+v\n", *idm)
+		fmt.Fprintf(out, "%+v\n\n", *idm)
 		dm, err := telegram.ParseDataMessage(in)
 		if err != nil {
 			fmt.Fprintf(out, "Error receiving data message: %s\n", err.Error())
 			continue
 		}
-		fmt.Fprintf(out, "%+v\n", *dm)
->>>>>>> message
+		fmt.Fprintf(out, "%+v\n\n", *dm)
 	}
 }
 
