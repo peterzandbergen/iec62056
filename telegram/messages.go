@@ -414,10 +414,12 @@ func ParseIdentificationMessage(r *bufio.Reader) (*IdentifcationMessage, error) 
 	// StartChar
 	b, err = r.ReadByte()
 	if err != nil {
-		return nil, ErrFormatError
+		return nil, fmt.Errorf("IdentifcationMessage: err reading first byte: %s", err.Error())
+		// return nil, ErrFormatError
 	}
 	if b != StartChar {
-		return nil, ErrFormatError
+		return nil, fmt.Errorf("IdentifcationMessage: first byte is not the start char: %c", rune(b))
+		// return nil, ErrFormatError
 	}
 
 	// Manufacturer ID
