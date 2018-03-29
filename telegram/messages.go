@@ -10,6 +10,8 @@ import (
 	"log"
 )
 
+const verbose = false
+
 type RequestMessage struct {
 	deviceAddress string
 }
@@ -188,7 +190,9 @@ func ParseDataMessage(r *bufio.Reader) (*DataMessage, error) {
 	var res *[]DataSet
 	var bcc = Bcc(0)
 
-	log.Println("Starting ParseDataMessage")
+	if verbose {
+		log.Println("Starting ParseDataMessage")
+	}
 	// Consume all bytes till a start of message is found.
 	for {
 		b, err = r.ReadByte()
@@ -199,7 +203,9 @@ func ParseDataMessage(r *bufio.Reader) (*DataMessage, error) {
 			break
 		}
 	}
-	log.Println("Found StxChar")
+	if verbose {
+		log.Println("Found StxChar")
+	}
 	// Get the datasets.
 	res, err = ParseDataBlock(r, &bcc)
 	if err != nil {
@@ -222,14 +228,18 @@ func ParseDataMessageEnd(r *bufio.Reader, bcc *Bcc) (*DataMessage, error) {
 	var b byte
 	var err error
 
-	log.Println("Starting ParseDataMessageEnd")
+	if verbose {
+		log.Println("Starting ParseDataMessageEnd")
+	}
 
 	b, err = r.ReadByte()
 	if err != nil {
 		return nil, err
 	}
 	if b != EndChar {
-		log.Printf("ParseDataMessageEnd, error parsing EndChar, found %d", b)
+		if verbose {
+			log.Printf("ParseDataMessageEnd, error parsing EndChar, found %d", b)
+		}
 		return nil, ErrFormatError
 	}
 	bcc.Digest(b)
@@ -239,7 +249,9 @@ func ParseDataMessageEnd(r *bufio.Reader, bcc *Bcc) (*DataMessage, error) {
 		return nil, err
 	}
 	if b != CR {
-		log.Println("ParseDataMessageEnd, error parsing CR")
+		if verbose {
+			log.Println("ParseDataMessageEnd, error parsing CR")
+		}
 		return nil, ErrFormatError
 	}
 	bcc.Digest(b)
@@ -249,7 +261,9 @@ func ParseDataMessageEnd(r *bufio.Reader, bcc *Bcc) (*DataMessage, error) {
 		return nil, err
 	}
 	if b != LF {
-		log.Println("ParseDataMessageEnd, error parsing LF")
+		if verbose {
+			log.Println("ParseDataMessageEnd, error parsing LF")
+		}
 		return nil, ErrFormatError
 	}
 	bcc.Digest(b)
@@ -259,14 +273,18 @@ func ParseDataMessageEnd(r *bufio.Reader, bcc *Bcc) (*DataMessage, error) {
 		return nil, err
 	}
 	if b != EtxChar {
-		log.Println("ParseDataMessageEnd, error parsing EtxChar")
+		if verbose {
+			log.Println("ParseDataMessageEnd, error parsing EtxChar")
+		}
 		return nil, ErrFormatError
 	}
 	bcc.Digest(b)
 
 	b, err = r.ReadByte()
 	if err != nil {
-		log.Println("ParseDataMessageEnd, error parsing Bcc")
+		if verbose {
+			log.Println("ParseDataMessageEnd, error parsing Bcc")
+		}
 		return nil, err
 	}
 
@@ -280,7 +298,9 @@ func ParseDataBlock(r *bufio.Reader, bcc *Bcc) (*[]DataSet, error) {
 	var err error
 	var res []DataSet
 
-	log.Println("Starting ParseDataBlock")
+	if verbose {
+		log.Println("Starting ParseDataBlock")
+	}
 
 	for {
 		var ds []DataSet
@@ -308,7 +328,9 @@ func ParseDataLine(r *bufio.Reader, bcc *Bcc) ([]DataSet, error) {
 	var ds *DataSet
 	var res []DataSet
 
-	log.Println("Starting ParseDataLine")
+	if verbose {
+		log.Println("Starting ParseDataLine")
+	}
 
 	for {
 		ds, err = ParseDataSet(r, bcc)
@@ -347,9 +369,13 @@ func ParseDataSet(r *bufio.Reader, bcc *Bcc) (*DataSet, error) {
 	res := &DataSet{}
 
 	// Read the address till FrontBoundaryChar == (
-	log.Println("Starting ParseDataSet")
+	if verbose {
+		log.Println("Starting ParseDataSet")
+	}
 
-	log.Println("Scanning for Address")
+	if verbose {
+		log.Println("Scanning for Address")
+	}
 ScanAddress:
 	for {
 		b, err = r.ReadByte()
@@ -379,7 +405,9 @@ ScanAddress:
 	v = v[:0]
 
 	// Scan for value till * or )
-	log.Println("Scanning for Value")
+	if verbose {
+		log.Println("Scanning for Value")
+	}
 ScanValue:
 	for {
 		b, err = r.ReadByte()
@@ -407,7 +435,9 @@ ScanValue:
 	}
 	v = v[:0]
 
-	log.Println("Scanning for Unit")
+	if verbose {
+		log.Println("Scanning for Unit")
+	}
 ScanUnit:
 	for {
 		b, err = r.ReadByte()
