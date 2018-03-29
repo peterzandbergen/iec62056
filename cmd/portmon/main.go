@@ -48,7 +48,7 @@ func writeResponses(wg *sync.WaitGroup, in io.Reader, out io.Writer) {
 			return
 		}
 		n, err = out.Write(buf[:n])
-		fmt.Fprintf(out, " %+v ", buf[:n])
+		// fmt.Fprintf(out, " %+v ", buf[:n])
 	}
 }
 
