@@ -225,6 +225,7 @@ func ParseDataMessageEnd(r *bufio.Reader, bcc *Bcc) (*DataMessage, error) {
 		return nil, err
 	}
 	if b != EndChar {
+		log.Println("ParseDataMessageEnd, error parsing EndChar")
 		return nil, ErrFormatError
 	}
 	bcc.Digest(b)
@@ -234,6 +235,7 @@ func ParseDataMessageEnd(r *bufio.Reader, bcc *Bcc) (*DataMessage, error) {
 		return nil, err
 	}
 	if b != CR {
+		log.Println("ParseDataMessageEnd, error parsing CR")
 		return nil, ErrFormatError
 	}
 	bcc.Digest(b)
@@ -243,6 +245,7 @@ func ParseDataMessageEnd(r *bufio.Reader, bcc *Bcc) (*DataMessage, error) {
 		return nil, err
 	}
 	if b != LF {
+		log.Println("ParseDataMessageEnd, error parsing LF")
 		return nil, ErrFormatError
 	}
 	bcc.Digest(b)
@@ -252,12 +255,14 @@ func ParseDataMessageEnd(r *bufio.Reader, bcc *Bcc) (*DataMessage, error) {
 		return nil, err
 	}
 	if b != EtxChar {
+		log.Println("ParseDataMessageEnd, error parsing EtxChar")
 		return nil, ErrFormatError
 	}
 	bcc.Digest(b)
 
 	b, err = r.ReadByte()
 	if err != nil {
+		log.Println("ParseDataMessageEnd, error parsing Bcc")
 		return nil, err
 	}
 

@@ -92,7 +92,7 @@ func main() {
 	// Start the reader and the writer.
 	wg.Add(2)
 	go readCommands(wg, os.Stdin, p)
-	// go writeResponses(wg, br, os.Stdout)
-	go writeHexResponses(wg, br, os.Stdout)
+	go writeResponses(wg, br, os.Stdout)
+	// go writeHexResponses(wg, br, os.Stdout)
 	wg.Wait()
 }
