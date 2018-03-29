@@ -48,6 +48,12 @@ func writeResponses(wg *sync.WaitGroup, in io.Reader, out io.Writer) {
 			return
 		}
 		fmt.Fprintf(out, " %+v ", buf[:n])
+		// replace CR with space.
+		for i := 0; i < n; i++ {
+			if buf[i] == 0xd {
+				buf[i] = byte(' ')
+			}
+		}
 		n, err = out.Write(buf[:n])
 	}
 }
