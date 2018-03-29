@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/peterzandbergen/iec62056/telegram"
 
@@ -15,7 +16,8 @@ import (
 func readCommands(wg *sync.WaitGroup, in io.Reader, p io.Writer) {
 	// connect buffered reader and read bytes.
 	var cr = bufio.NewReader(in)
-
+	time.Sleep(time.Second)
+	telegram.SerializeRequestMessage(p, telegram.RequestMessage{})
 	for {
 		b, err := cr.ReadByte()
 		if err != nil {
