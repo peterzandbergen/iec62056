@@ -30,7 +30,7 @@ const validDataMessageBcc = validDataBlock +
 	string(CR) + string(LF) +
 	string(EtxChar)
 
-const validDataMessage = string(StartChar) +
+const validDataMessage = string(StxChar) +
 	validDataBlock +
 	string(EndChar) +
 	string(CR) + string(LF) +

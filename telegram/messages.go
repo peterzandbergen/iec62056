@@ -116,6 +116,7 @@ const (
 	StartChar          = byte('/')
 	RequestCommandChar = byte('?')
 	EndChar            = byte('!')
+	StxChar            = byte(0x02)
 	EtxChar            = byte(0x03)
 	SeqDelChar         = byte('\\')
 )
@@ -182,14 +183,13 @@ func ParseDataMessage(r *bufio.Reader) (*DataMessage, error) {
 	var bcc = Bcc(0)
 
 	// Consume all bytes till a start of message is found.
-	// FirstChar:
 	for {
 		b, err = r.ReadByte()
 		if err != nil {
 			return nil, ErrUnexpectedEOF
 		}
-		if b == StartChar {
-			break // FirstChar
+		if b == StxChar {
+			break
 		}
 	}
 	// Get the datasets.
@@ -415,22 +415,19 @@ func ParseIdentificationMessage(r *bufio.Reader) (*IdentifcationMessage, error) 
 	// StartChar
 	b, err = r.ReadByte()
 	if err != nil {
-		return nil, fmt.Errorf("IdentifcationMessage: err reading first byte: %s", err.Error())
-		// return nil, ErrFormatError
+		return nil, ErrFormatError
 	}
 	if b != StartChar {
-		return nil, fmt.Errorf("IdentifcationMessage: first byte is not the start char: %c", rune(b))
-		// return nil, ErrFormatError
+		return nil, ErrFormatError
 	}
 
 	// Manufacturer ID
 	var id [3]byte
-	for i := 0; i < 3; i++ {
-		b, err = r.ReadByte()
-		if err != nil {
-			return nil, ErrFormatError
-		}
-		id[i] = b
+	var i int
+	// mID
+	i, err = r.Read(id[:])
+	if err != nil && i != 3 {
+		return nil, ErrFormatError
 	}
 	res.mID = string(id[:])
 
