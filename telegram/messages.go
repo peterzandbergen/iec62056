@@ -362,7 +362,6 @@ ScanAddress:
 		default:
 			bcc.Digest(b)
 			if !ValidAddressChar(b) {
-				r.UnreadByte()
 				return nil, ErrFormatError
 			}
 			v = append(v, b)
