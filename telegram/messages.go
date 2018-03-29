@@ -123,7 +123,7 @@ const (
 	SeqDelChar         = byte('\\')
 )
 
-func ValidAddresChar(b byte) bool {
+func ValidAddressChar(b byte) bool {
 	switch b {
 	case FrontBoundaryChar, RearBoundaryChar, StartChar, EndChar:
 		return false
@@ -142,7 +142,7 @@ func ValidValueChar(b byte) bool {
 }
 
 func ValidUnitChar(b byte) bool {
-	return ValidAddresChar(b)
+	return ValidAddressChar(b)
 }
 
 // AcknowledgeModeFromByte returns the acknowledge mode from the given byte value.
@@ -309,6 +309,7 @@ func ParseDataLine(r *bufio.Reader, bcc *Bcc) ([]DataSet, error) {
 	for {
 		ds, err = ParseDataSet(r, bcc)
 		if err != nil {
+			r.UnreadByte()
 			return nil, ErrFormatError
 		}
 		res = append(res, *ds)
@@ -360,7 +361,8 @@ ScanAddress:
 			break ScanAddress
 		default:
 			bcc.Digest(b)
-			if !ValidAddresChar(b) {
+			if !ValidAddressChar(b) {
+				r.UnreadByte()
 				return nil, ErrFormatError
 			}
 			v = append(v, b)

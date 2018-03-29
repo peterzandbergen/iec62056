@@ -31,7 +31,7 @@ const validDataMessageBcc = validDataBlock +
 	string(EtxChar)
 
 const validDataMessage = string(StxChar) +
-	validDataBlock +
+	validDataBlockNoEnd +
 	string(EndChar) +
 	string(CR) + string(LF) +
 	string(EtxChar) +
