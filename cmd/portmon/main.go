@@ -36,16 +36,21 @@ func readCommands(wg *sync.WaitGroup, in io.Reader, p io.Writer) {
 	}
 }
 
-func writeResponses(wg *sync.WaitGroup, in io.Reader, out io.Writer) {
+func writeResponses(wg *sync.WaitGroup, in *bufio.Reader, out io.Writer) {
+	defer wg.Done()
 	for {
-		var buf = make([]byte, 1000)
-		n, err := in.Read(buf)
+		idm, err := telegram.ParseIdentificationMessage(in)
 		if err != nil {
-			fmt.Fprintf(out, "Error %s, aborting\n", err.Error())
-			wg.Done()
-			return
+			fmt.Fprintf(out, "Error receiving ID message: %s\n", err.Error())
+			continue
 		}
-		n, err = out.Write(buf[:n])
+		fmt.Fprintf(out, "%+v\n", *idm)
+		dm, err := telegram.ParseDataMessage(in)
+		if err != nil {
+			fmt.Fprintf(out, "Error receiving data message: %s\n", err.Error())
+			continue
+		}
+		fmt.Fprintf(out, "%+v\n", *dm)
 	}
 }
 
@@ -65,9 +70,11 @@ func main() {
 	}
 	defer p.Close()
 
+	br := bufio.NewReader(p)
+
 	// Start the reader and the writer.
 	wg.Add(2)
 	go readCommands(wg, os.Stdin, p)
-	go writeResponses(wg, p, os.Stdout)
+	go writeResponses(wg, br, os.Stdout)
 	wg.Wait()
 }
