@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+
+	"log"
 )
 
 type RequestMessage struct {
@@ -182,6 +184,7 @@ func ParseDataMessage(r *bufio.Reader) (*DataMessage, error) {
 	var res *[]DataSet
 	var bcc = Bcc(0)
 
+	log.Println("Starting ParseDataMessage")
 	// Consume all bytes till a start of message is found.
 	for {
 		b, err = r.ReadByte()
@@ -192,6 +195,7 @@ func ParseDataMessage(r *bufio.Reader) (*DataMessage, error) {
 			break
 		}
 	}
+	log.Println("Found StxChar")
 	// Get the datasets.
 	res, err = ParseDataBlock(r, &bcc)
 	if err != nil {
@@ -213,6 +217,8 @@ func ParseDataMessage(r *bufio.Reader) (*DataMessage, error) {
 func ParseDataMessageEnd(r *bufio.Reader, bcc *Bcc) (*DataMessage, error) {
 	var b byte
 	var err error
+
+	log.Println("Starting ParseDataMessageEnd")
 
 	b, err = r.ReadByte()
 	if err != nil {
@@ -265,6 +271,8 @@ func ParseDataBlock(r *bufio.Reader, bcc *Bcc) (*[]DataSet, error) {
 	var err error
 	var res []DataSet
 
+	log.Println("Starting ParseDataBlock")
+
 	for {
 		var ds []DataSet
 		ds, err = ParseDataLine(r, bcc)
@@ -290,6 +298,8 @@ func ParseDataLine(r *bufio.Reader, bcc *Bcc) ([]DataSet, error) {
 	var err error
 	var ds *DataSet
 	var res []DataSet
+
+	log.Println("Starting ParseDataLine")
 
 	for {
 		ds, err = ParseDataSet(r, bcc)
@@ -327,6 +337,9 @@ func ParseDataSet(r *bufio.Reader, bcc *Bcc) (*DataSet, error) {
 	res := &DataSet{}
 
 	// Read the address till FrontBoundaryChar == (
+	log.Println("Starting ParseDataSet")
+
+	log.Println("Scanning for Address")
 ScanAddress:
 	for {
 		b, err = r.ReadByte()
@@ -356,6 +369,7 @@ ScanAddress:
 	v = v[:0]
 
 	// Scan for value till * or )
+	log.Println("Scanning for Value")
 ScanValue:
 	for {
 		b, err = r.ReadByte()
@@ -383,6 +397,7 @@ ScanValue:
 	}
 	v = v[:0]
 
+	log.Println("Scanning for Unit")
 ScanUnit:
 	for {
 		b, err = r.ReadByte()
