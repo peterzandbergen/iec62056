@@ -56,6 +56,21 @@ func writeResponses(wg *sync.WaitGroup, in *bufio.Reader, out io.Writer) {
 	}
 }
 
+func writeHexResponses(wg *sync.WaitGroup, in *bufio.Reader, out io.Writer) {
+	defer wg.Done()
+	for {
+		b, err := in.ReadByte()
+		if err != nil {
+			return
+		}
+		fmt.Fprintf(out, "[%c]", b)
+		if b == 0x0D {
+			b = ' '
+		}
+		fmt.Fprint(out, rune(b))
+	}
+}
+
 func main() {
 	var wg = &sync.WaitGroup{}
 
@@ -77,6 +92,7 @@ func main() {
 	// Start the reader and the writer.
 	wg.Add(2)
 	go readCommands(wg, os.Stdin, p)
-	go writeResponses(wg, br, os.Stdout)
+	// go writeResponses(wg, br, os.Stdout)
+	go writeHexResponses(wg, br, os.Stdout)
 	wg.Wait()
 }
