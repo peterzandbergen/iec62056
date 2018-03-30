@@ -10,16 +10,9 @@ import (
 	"log"
 )
 
-const verbose = false
-
-type RequestMessage struct {
-	deviceAddress string
-}
-
+// SerializeRequestMessage serializes the request message to w.
 func SerializeRequestMessage(w io.Writer, rm RequestMessage) (int, error) {
-	var msg string
-
-	msg = string(StartChar) +
+	msg := string(StartChar) +
 		string(RequestCommandChar) +
 		rm.deviceAddress +
 		string(EndChar) +
@@ -28,24 +21,7 @@ func SerializeRequestMessage(w io.Writer, rm RequestMessage) (int, error) {
 	return w.Write([]byte(msg))
 }
 
-// IdentifcationMessage type is the message from the meter in response to the read command.
-type IdentifcationMessage struct {
-	mID            string
-	baudID         byte
-	identification string
-}
-
-func (i *IdentifcationMessage) String() string {
-	return fmt.Sprintf("mID: %s, baudID: %c, identification: %s", i.mID, i.baudID, i.identification)
-}
-
-// AcknowledgeMessage type needs documentation. TODO:
-type AcknowledgeMessage struct {
-	pcc ProtocolControlCharacter
-	// baudrate
-	modeCondtrol AcknowledgeMode
-}
-
+// DataMessage type captures the data message.
 type DataMessage struct {
 	datasets *[]DataSet
 	bcc      Bcc
@@ -58,34 +34,40 @@ func (d *DataMessage) String() string {
 	return b.String()
 }
 
+// DataSet type.
 type DataSet struct {
 	address string
 	value   string
 	unit    string
 }
 
+// Bcc type captures the checksum.
 type Bcc byte
 
+// Digest processes the next byte for the checksum.
 func (bcc *Bcc) Digest(b ...byte) {
 	for _, i := range b {
 		*bcc = (*bcc) ^ Bcc(i)
 	}
 }
 
-// ProtocolControlCharacter
+// ProtocolControlCharacter type.
 type ProtocolControlCharacter byte
 
 const (
-	// ProtocolNormal
+	// ProtControlNormal value.
 	ProtControlNormal = ProtocolControlCharacter(byte('0'))
-	// ProtControlSecondary
+	// ProtControlSecondary value.
 	ProtControlSecondary = ProtocolControlCharacter(byte('1'))
 )
 
+// AcknowledgeMode type.
 type AcknowledgeMode byte
 
+// BaudrateIdentification type.
 type BaudrateIdentification byte
 
+// Baudrate returns the numeric baudrate from the code in the ID message.
 func Baudrate(br BaudrateIdentification) int {
 	switch rune(br) {
 	case '0':
