@@ -9,6 +9,31 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/golang/snappy"
+  packages = ["."]
+  revision = "553a641470496b2327abcac10b36396bd98e45c9"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/syndtr/goleveldb"
+  packages = [
+    "leveldb",
+    "leveldb/cache",
+    "leveldb/comparer",
+    "leveldb/errors",
+    "leveldb/filter",
+    "leveldb/iterator",
+    "leveldb/journal",
+    "leveldb/memdb",
+    "leveldb/opt",
+    "leveldb/storage",
+    "leveldb/table",
+    "leveldb/util"
+  ]
+  revision = "714f901b98fdb3aa954b4193d8cbd64a28d80cad"
+
+[[projects]]
+  branch = "master"
   name = "go.bug.st/serial.v1"
   packages = [
     ".",
@@ -29,6 +54,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7b09e21f688f78a0fba71aa5f9bbe6371918d094a9dc84fc5877b9e0849070d9"
+  inputs-digest = "8e00c7896772ed0596b971ccb7610facb25f2df46610815c43dcc25ad7b7f435"
   solver-name = "gps-cdcl"
   solver-version = 1
