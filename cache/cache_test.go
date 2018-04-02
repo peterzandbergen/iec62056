@@ -12,7 +12,7 @@ const testDB = "./.testdb"
 func TestOpenDB(t *testing.T) {
 	var c *Cache
 
-	c, err := New(testDB)
+	c, err := Open(testDB)
 	if err != nil {
 		t.Fatalf("Error opening database: %s", err.Error())
 	}
@@ -20,7 +20,8 @@ func TestOpenDB(t *testing.T) {
 }
 
 var putM = &model.Measurement{
-	ManufacturerID: "MAN",
+	Time:           time.Date(2018, 3, 21, 12, 30, 0, 0, time.Local),
+	ManufacturerID: "T01",
 	Identification: "sddsadfada",
 	Readings: []model.DataSet{
 		{
@@ -34,7 +35,7 @@ var putM = &model.Measurement{
 func TestPutMeasurement(t *testing.T) {
 	var c *Cache
 
-	c, err := New(testDB)
+	c, err := Open(testDB)
 	if err != nil {
 		t.Fatalf("Error opening database: %s", err.Error())
 	}
@@ -47,7 +48,8 @@ func TestPutMeasurement(t *testing.T) {
 }
 
 var getM = &model.Measurement{
-	ManufacturerID: "MAN",
+	Time:           time.Date(2018, 3, 21, 12, 30, 0, 0, time.Local),
+	ManufacturerID: "T02",
 	Identification: "SSSSS",
 	Readings: []model.DataSet{
 		{
@@ -61,7 +63,7 @@ var getM = &model.Measurement{
 func TestGetMeasurement(t *testing.T) {
 	var c *Cache
 
-	c, err := New(testDB)
+	c, err := Open(testDB)
 	if err != nil {
 		t.Fatalf("Error opening database: %s", err.Error())
 	}
@@ -84,7 +86,7 @@ func TestGetMeasurement(t *testing.T) {
 var getMultM = []*model.Measurement{
 	{
 		Time:           time.Date(2018, 3, 21, 12, 30, 0, 0, time.Local),
-		ManufacturerID: "MAN",
+		ManufacturerID: "T03",
 		Identification: "SSSSS",
 		Readings: []model.DataSet{
 			{
@@ -96,7 +98,7 @@ var getMultM = []*model.Measurement{
 	},
 	{
 		Time:           time.Date(2018, 3, 21, 12, 35, 0, 0, time.Local),
-		ManufacturerID: "MAN",
+		ManufacturerID: "T03",
 		Identification: "SSSSS",
 		Readings: []model.DataSet{
 			{
@@ -108,7 +110,7 @@ var getMultM = []*model.Measurement{
 	},
 	{
 		Time:           time.Date(2018, 3, 21, 12, 40, 0, 0, time.Local),
-		ManufacturerID: "MAN",
+		ManufacturerID: "T03",
 		Identification: "SSSSS",
 		Readings: []model.DataSet{
 			{
@@ -123,7 +125,7 @@ var getMultM = []*model.Measurement{
 func TestGetNMeasurement(t *testing.T) {
 	var c *Cache
 
-	c, err := New(testDB)
+	c, err := Open(testDB)
 	if err != nil {
 		t.Fatalf("Error opening database: %s", err.Error())
 	}
@@ -133,12 +135,13 @@ func TestGetNMeasurement(t *testing.T) {
 		c.Put(m)
 	}
 
-	ms, err := c.GetN(3)
+	n := 1000
+	ms, err := c.GetN(n)
 	if err != nil {
 		t.Fatalf("error get: %s", err.Error())
 	}
-	if len(ms) != 3 {
-		t.Errorf("expected %d messages, received %d", len(getMultM), len(ms))
+	if len(ms) < len(getMultM) {
+		t.Errorf("expected at least %d messages, received %d", len(getMultM), len(ms))
 	}
 	t.Logf("Found %d messages", len(ms))
 }

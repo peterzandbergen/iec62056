@@ -8,7 +8,6 @@ import (
 	// Stdlib
 	"encoding/json"
 	"errors"
-	"time"
 
 	// Vendor
 	"github.com/syndtr/goleveldb/leveldb"
@@ -113,12 +112,7 @@ type Cache struct {
 	options  *opt.Options
 }
 
-type CachedObject struct {
-	Time   time.Time
-	Object interface{}
-}
-
-func New(filename string) (*Cache, error) {
+func Open(filename string) (*Cache, error) {
 	db, err := leveldb.OpenFile(filename, nil)
 	if err != nil {
 		return nil, err
