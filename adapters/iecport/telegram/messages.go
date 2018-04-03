@@ -23,22 +23,22 @@ func SerializeRequestMessage(w io.Writer, rm RequestMessage) (int, error) {
 
 // DataMessage type captures the data message.
 type DataMessage struct {
-	datasets *[]DataSet
+	DataSets *[]DataSet
 	bcc      Bcc
 }
 
 func (d *DataMessage) String() string {
 	b := &bytes.Buffer{}
 
-	fmt.Fprintf(b, "bcc: %d %+v", d.bcc, *d.datasets)
+	fmt.Fprintf(b, "bcc: %d %+v", d.bcc, *d.DataSets)
 	return b.String()
 }
 
 // DataSet type.
 type DataSet struct {
-	address string
-	value   string
-	unit    string
+	Address string
+	Value   string
+	Unit    string
 }
 
 // Bcc type captures the checksum.
@@ -199,7 +199,7 @@ func ParseDataMessage(r *bufio.Reader) (*DataMessage, error) {
 	}
 
 	return &DataMessage{
-		datasets: res,
+		DataSets: res,
 		bcc:      bcc,
 	}, nil
 }
@@ -383,7 +383,7 @@ ScanAddress:
 		}
 	}
 	// Address read.
-	res.address = string(v)
+	res.Address = string(v)
 	v = v[:0]
 
 	// Scan for value till * or )
@@ -410,9 +410,9 @@ ScanValue:
 			}
 		}
 	}
-	res.value = string(v)
+	res.Value = string(v)
 	if b == RearBoundaryChar {
-		res.unit = ""
+		res.Unit = ""
 		return res, nil
 	}
 	v = v[:0]
@@ -440,7 +440,7 @@ ScanUnit:
 			}
 		}
 	}
-	res.unit = string(v)
+	res.Unit = string(v)
 	return res, nil
 }
 
@@ -468,7 +468,7 @@ func ParseIdentificationMessage(r *bufio.Reader) (*IdentifcationMessage, error) 
 		}
 		id[i] = b
 	}
-	res.mID = string(id[:])
+	res.ManID = string(id[:])
 
 	// baudrate mode
 	b, err = r.ReadByte()
@@ -478,7 +478,7 @@ func ParseIdentificationMessage(r *bufio.Reader) (*IdentifcationMessage, error) 
 	if Baudrate(BaudrateIdentification(b)) == 0 {
 		return nil, ErrFormatError
 	}
-	res.baudID = b
+	res.BaudID = b
 
 	var vt [33]byte
 	var v = vt[:0]
@@ -515,7 +515,7 @@ ScanIdenfication:
 		}
 	}
 
-	res.identification = string(v)
+	res.Identification = string(v)
 	// Test if the last char is LF
 	b, err = r.ReadByte()
 	if err != nil || b != LF {

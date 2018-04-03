@@ -1,11 +1,10 @@
-package iec62056
+package iecport
 
 import (
 	"bufio"
 	"errors"
 
-	"github.com/peterzandbergen/iec62056/telegram"
-
+	"github.com/peterzandbergen/iec62056/adapters/iecport/telegram"
 	"go.bug.st/serial.v1"
 )
 
@@ -108,11 +107,28 @@ func (p *Port) Read() (*DataMessage, error) {
 	}
 
 	// Wait for the Identification Message.
-	_, err = telegram.ParseIdentificationMessage(p.r)
+	im, err := telegram.ParseIdentificationMessage(p.r)
 	if err != nil {
 		return nil, err
 	}
-	// Send ack.
 
-	return nil, nil
+	// Wait for the Data.
+	dm, err := telegram.ParseDataMessage(p.r)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &DataMessage{
+		ManufacturerID: im.ManID,
+		MeterID:        im.Identification,
+	}
+	for _, m := range *dm.DataSets {
+		var s = DataSet{
+			Address: m.Address,
+			Value:   m.Value,
+			Unit:    m.Unit,
+		}
+		res.DataSets = append(res.DataSets, s)
+	}
+	return res, nil
 }

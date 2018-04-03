@@ -1,12 +1,12 @@
-package iec62056
+package iecport
 
 // RequestMessage
 // DataMessage type contains the read meter information.
 type DataMessage struct {
-	MmanufacturerID string
-	MeterID         string
-	EnhancedID      string
-	DataSets        []DataSet
+	ManufacturerID string
+	MeterID        string
+	EnhancedID     string
+	DataSets       []DataSet
 }
 
 // DataSet type contains the measurement returned by the meter.

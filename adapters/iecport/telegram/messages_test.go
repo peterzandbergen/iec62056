@@ -53,14 +53,14 @@ func TestParseDataSetNoValueNoUnit(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error parsing data set: %s", err.Error())
 	}
-	if m.address != "1.1.1.1" {
-		t.Errorf("Error parsing address, expected %s, received %s", "1.1.1.1", m.address)
+	if m.Address != "1.1.1.1" {
+		t.Errorf("Error parsing address, expected %s, received %s", "1.1.1.1", m.Address)
 	}
-	if m.value != "" {
-		t.Errorf("Error parsing value, expected \"%s\", received \"%s\"", "", m.value)
+	if m.Value != "" {
+		t.Errorf("Error parsing value, expected \"%s\", received \"%s\"", "", m.Value)
 	}
-	if m.unit != "" {
-		t.Errorf("Error parsing unit, expected \"%s\", received \"%s\"", "", m.unit)
+	if m.Unit != "" {
+		t.Errorf("Error parsing unit, expected \"%s\", received \"%s\"", "", m.Unit)
 	}
 }
 
@@ -71,14 +71,14 @@ func TestParseDataSetValueNoUnit(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error parsing data set: %s", err.Error())
 	}
-	if m.address != "1.1.1.1" {
-		t.Errorf("Error parsing address, expected %s, received %s", "1.1.1.1", m.address)
+	if m.Address != "1.1.1.1" {
+		t.Errorf("Error parsing address, expected %s, received %s", "1.1.1.1", m.Address)
 	}
-	if m.value != "12" {
-		t.Errorf("Error parsing value, expected \"%s\", received \"%s\"", "12", m.value)
+	if m.Value != "12" {
+		t.Errorf("Error parsing value, expected \"%s\", received \"%s\"", "12", m.Value)
 	}
-	if m.unit != "" {
-		t.Errorf("Error parsing unit, expected \"%s\", received \"%s\"", "", m.unit)
+	if m.Unit != "" {
+		t.Errorf("Error parsing unit, expected \"%s\", received \"%s\"", "", m.Unit)
 	}
 }
 
@@ -91,14 +91,14 @@ func TestParseDataSetValueUnit(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error parsing data set: %s", err.Error())
 	}
-	if m.address != "1.1.1.1" {
-		t.Errorf("Error parsing address, expected %s, received %s", "1.1.1.1", m.address)
+	if m.Address != "1.1.1.1" {
+		t.Errorf("Error parsing address, expected %s, received %s", "1.1.1.1", m.Address)
 	}
-	if m.value != "12" {
-		t.Errorf("Error parsing value, expected \"%s\", received \"%s\"", "12", m.value)
+	if m.Value != "12" {
+		t.Errorf("Error parsing value, expected \"%s\", received \"%s\"", "12", m.Value)
 	}
-	if m.unit != "kWh" {
-		t.Errorf("Error parsing unit, expected \"%s\", received \"%s\"", "kWh", m.unit)
+	if m.Unit != "kWh" {
+		t.Errorf("Error parsing unit, expected \"%s\", received \"%s\"", "kWh", m.Unit)
 	}
 }
 
@@ -111,14 +111,14 @@ func TestParseDataSetValueUnitCRLF(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error parsing data set: %s", err.Error())
 	}
-	if m.address != "1.1.1.1" {
-		t.Errorf("Error parsing address, expected %s, received %s", "1.1.1.1", m.address)
+	if m.Address != "1.1.1.1" {
+		t.Errorf("Error parsing address, expected %s, received %s", "1.1.1.1", m.Address)
 	}
-	if m.value != "12" {
-		t.Errorf("Error parsing value, expected \"%s\", received \"%s\"", "12", m.value)
+	if m.Value != "12" {
+		t.Errorf("Error parsing value, expected \"%s\", received \"%s\"", "12", m.Value)
 	}
-	if m.unit != "kWh" {
-		t.Errorf("Error parsing unit, expected \"%s\", received \"%s\"", "kWh", m.unit)
+	if m.Unit != "kWh" {
+		t.Errorf("Error parsing unit, expected \"%s\", received \"%s\"", "kWh", m.Unit)
 	}
 	if b, err := r.ReadByte(); err == nil && b != CR {
 		t.Errorf("Expected CR, received %s", string(rune(b)))
@@ -223,16 +223,16 @@ func TestDataMessage(t *testing.T) {
 		t.Fatalf("Error: %s", err.Error())
 	}
 	_ = dm
-	if len(*(dm.datasets)) != 4 {
-		t.Errorf("Expected 4, received %d", len(*(dm.datasets)))
+	if len(*(dm.DataSets)) != 4 {
+		t.Errorf("Expected 4, received %d", len(*(dm.DataSets)))
 	}
 	var bcc Bcc
 	bcc.Digest([]byte(validDataMessageBcc)...)
 	if bcc != dm.bcc {
 		t.Errorf("Bcc: Expected %d, received %d", bcc, dm.bcc)
 	}
-	if len(*(dm.datasets)) != 4 {
-		t.Errorf("Expected 4, received %d", len(*(dm.datasets)))
+	if len(*(dm.DataSets)) != 4 {
+		t.Errorf("Expected 4, received %d", len(*(dm.DataSets)))
 	}
 }
 
@@ -246,14 +246,14 @@ func TestParseDataSetValue32(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error parsing data set: %s", err.Error())
 	}
-	if m.address != "1.1.1.1" {
-		t.Errorf("Error parsing address, expected %s, received %s", "1.1.1.1", m.address)
+	if m.Address != "1.1.1.1" {
+		t.Errorf("Error parsing address, expected %s, received %s", "1.1.1.1", m.Address)
 	}
-	if m.value != "12345678901234567890123456789012" {
-		t.Errorf("Error parsing value, expected \"%s\", received \"%s\"", "", m.value)
+	if m.Value != "12345678901234567890123456789012" {
+		t.Errorf("Error parsing value, expected \"%s\", received \"%s\"", "", m.Value)
 	}
-	if m.unit != "" {
-		t.Errorf("Error parsing unit, expected \"%s\", received \"%s\"", "", m.unit)
+	if m.Unit != "" {
+		t.Errorf("Error parsing unit, expected \"%s\", received \"%s\"", "", m.Unit)
 	}
 }
 
@@ -282,14 +282,14 @@ func TestParseDataSetUnit16(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error parsing data set: %s", err.Error())
 	}
-	if m.address != "1.1.1.1" {
-		t.Errorf("Error parsing address, expected %s, received %s", "1.1.1.1", m.address)
+	if m.Address != "1.1.1.1" {
+		t.Errorf("Error parsing address, expected %s, received %s", "1.1.1.1", m.Address)
 	}
-	if m.value != "12345678901234567890123456789012" {
-		t.Errorf("Error parsing value, expected \"%s\", received \"%s\"", "12345678901234567890123456789012", m.value)
+	if m.Value != "12345678901234567890123456789012" {
+		t.Errorf("Error parsing value, expected \"%s\", received \"%s\"", "12345678901234567890123456789012", m.Value)
 	}
-	if m.unit != "1234567890123456" {
-		t.Errorf("Error parsing unit, expected \"%s\", received \"%s\"", "1234567890123456", m.unit)
+	if m.Unit != "1234567890123456" {
+		t.Errorf("Error parsing unit, expected \"%s\", received \"%s\"", "1234567890123456", m.Unit)
 	}
 }
 
@@ -319,14 +319,14 @@ func TestParstIdenticationMessage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
-	if im.baudID != 'A' {
-		t.Errorf("baudrateID, expected %c, received %c", 'A', im.baudID)
+	if im.BaudID != 'A' {
+		t.Errorf("baudrateID, expected %c, received %c", 'A', im.BaudID)
 	}
-	if im.mID != "MAN" {
-		t.Errorf("mID, expected %s, received %s", "MAN", im.mID)
+	if im.ManID != "MAN" {
+		t.Errorf("mID, expected %s, received %s", "MAN", im.ManID)
 	}
-	if im.identification != "identification" {
-		t.Errorf("identification, expected %s, received %s", "idenfication", im.identification)
+	if im.Identification != "identification" {
+		t.Errorf("identification, expected %s, received %s", "idenfication", im.Identification)
 	}
 }
 
@@ -342,14 +342,14 @@ func TestParstIdenticationMessageBackslashW(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
-	if im.baudID != 'A' {
-		t.Errorf("baudrateID, expected %c, received %c", 'A', im.baudID)
+	if im.BaudID != 'A' {
+		t.Errorf("baudrateID, expected %c, received %c", 'A', im.BaudID)
 	}
-	if im.mID != "MAN" {
-		t.Errorf("mID, expected %s, received %s", "MAN", im.mID)
+	if im.ManID != "MAN" {
+		t.Errorf("mID, expected %s, received %s", "MAN", im.ManID)
 	}
-	if im.identification != "identification" {
-		t.Errorf("identification, expected %s, received %s", "idenfication", im.identification)
+	if im.Identification != "identification" {
+		t.Errorf("identification, expected %s, received %s", "idenfication", im.Identification)
 	}
 }
 

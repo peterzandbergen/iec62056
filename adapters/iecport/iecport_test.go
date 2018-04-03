@@ -1,12 +1,11 @@
-package iec62056
+package iecport
 
 import (
 	"testing"
 	"time"
 
+	"github.com/peterzandbergen/iec62056/adapters/iecport/telegram"
 	"go.bug.st/serial.v1"
-
-	"github.com/peterzandbergen/iec62056/telegram"
 )
 
 func TestNewPort(t *testing.T) {
