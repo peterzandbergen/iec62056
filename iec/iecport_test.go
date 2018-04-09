@@ -1,10 +1,12 @@
-package iecport
+package iec
 
 import (
+	"bufio"
+	"bytes"
 	"testing"
 	"time"
 
-	"github.com/peterzandbergen/iec62056/adapters/iecport/telegram"
+	"github.com/peterzandbergen/iec62056/iec/telegram"
 	"go.bug.st/serial.v1"
 )
 
@@ -249,4 +251,21 @@ func TestRawPortSerReqIDMsg(t *testing.T) {
 		t.Fatalf("error opening port: %s", err.Error())
 	}
 	t.Logf("response: %s", string(buf[:n]))
+}
+
+const identicationMessage = string(telegram.StartChar) +
+	"MAN" +
+	"A" +
+	"identification" +
+	string(telegram.CR) + string(telegram.LF)
+
+const immediateResponse = identicationMessage + telegram.ValidTestDataMessage
+
+func TestRead(t *testing.T) {
+	r := bufio.NewReader(bytes.NewReader([]byte(immediateResponse)))
+	m, err := readImmediateResponse(r)
+	if err != nil {
+		t.Fatalf("error reading immediate response: %s", err.Error())
+	}
+	t.Logf("message: %+v", m)
 }

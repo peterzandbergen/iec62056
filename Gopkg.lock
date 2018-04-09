@@ -14,6 +14,12 @@
   revision = "553a641470496b2327abcac10b36396bd98e45c9"
 
 [[projects]]
+  name = "github.com/spf13/pflag"
+  packages = ["."]
+  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/syndtr/goleveldb"
   packages = [
@@ -54,6 +60,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8e00c7896772ed0596b971ccb7610facb25f2df46610815c43dcc25ad7b7f435"
+  inputs-digest = "a614aedd1aa747edcb1177866c84a261c4d7e39be5190cb7c92d545b4bb6db41"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -111,6 +111,14 @@ const (
 	SeqDelChar         = byte('\\')
 )
 
+// ValidTestDataMessage can be used for testing.
+const ValidTestDataMessage = string(StxChar) +
+	`1.1.1.1(12*kWh)` + `1.1.1.2(12*kWh)` + "\r\n" +
+	string(EndChar) +
+	string(CR) + string(LF) +
+	string(EtxChar) +
+	string(Bcc(0))
+
 func ValidAddressChar(b byte) bool {
 	switch b {
 	case FrontBoundaryChar, RearBoundaryChar, StartChar, EndChar:

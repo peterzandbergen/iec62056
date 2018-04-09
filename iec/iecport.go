@@ -1,10 +1,10 @@
-package iecport
+package iec
 
 import (
 	"bufio"
 	"errors"
 
-	"github.com/peterzandbergen/iec62056/adapters/iecport/telegram"
+	"github.com/peterzandbergen/iec62056/iec/telegram"
 	"go.bug.st/serial.v1"
 )
 
@@ -52,7 +52,7 @@ func newDefaulSettings() *PortSettings {
 	}
 }
 
-// New creates a new port. If settings is nil, the uses the default settings.
+// New creates a new port. If settings is nil, it uses the default settings.
 func New(settings *PortSettings) *Port {
 	if settings == nil {
 		settings = newDefaulSettings()
@@ -95,25 +95,15 @@ func (p *Port) Close() {
 	p.r = nil
 }
 
-func (p *Port) Read() (*DataMessage, error) {
-	// Set the baudrate to 300
-	p.mode.BaudRate = p.InitialBaudRateModeABC
-	p.port.SetMode(p.mode)
-
-	// Send a request command.
-	_, err := telegram.SerializeRequestMessage(p.port, telegram.RequestMessage{})
-	if err != nil {
-		return nil, err
-	}
-
+func readImmediateResponse(r *bufio.Reader) (*DataMessage, error) {
 	// Wait for the Identification Message.
-	im, err := telegram.ParseIdentificationMessage(p.r)
+	im, err := telegram.ParseIdentificationMessage(r)
 	if err != nil {
 		return nil, err
 	}
 
 	// Wait for the Data.
-	dm, err := telegram.ParseDataMessage(p.r)
+	dm, err := telegram.ParseDataMessage(r)
 	if err != nil {
 		return nil, err
 	}
@@ -131,4 +121,17 @@ func (p *Port) Read() (*DataMessage, error) {
 		res.DataSets = append(res.DataSets, s)
 	}
 	return res, nil
+}
+
+func (p *Port) Read() (*DataMessage, error) {
+	// Set the baudrate to 300
+	p.mode.BaudRate = p.InitialBaudRateModeABC
+	p.port.SetMode(p.mode)
+
+	// Send a request command.
+	_, err := telegram.SerializeRequestMessage(p.port, telegram.RequestMessage{})
+	if err != nil {
+		return nil, err
+	}
+	return readImmediateResponse(p.r)
 }

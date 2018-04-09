@@ -1,4 +1,4 @@
-package iecport
+package iec
 
 // RequestMessage
 // DataMessage type contains the read meter information.

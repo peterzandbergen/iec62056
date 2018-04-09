@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/peterzandbergen/iec62056/adapters/iecport/telegram"
+	"github.com/peterzandbergen/iec62056/iec/telegram"
 	"go.bug.st/serial.v1"
 )
 

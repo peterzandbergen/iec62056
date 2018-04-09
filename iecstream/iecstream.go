@@ -6,7 +6,7 @@ package iecstream
 import (
 	"sync"
 
-	"github.com/peterzandbergen/iec62056/adapters/iecport"
+	"github.com/peterzandbergen/iec62056/iec"
 	"github.com/peterzandbergen/iec62056/model"
 )
 
@@ -15,7 +15,7 @@ type Stream struct {
 	m       sync.Mutex
 	running bool
 	c       chan *model.Measurement
-	p       iecport.Port
+	p       iec.Port
 }
 
 func (i *Stream) OpenPort() error {
