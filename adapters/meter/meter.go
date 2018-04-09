@@ -27,8 +27,7 @@ func Open(ps iec.PortSettings) (*Meter, error) {
 	}, nil
 }
 
-// Open opens a new meter adapter on the given port.
-// All other reference to the port should be relaesed.
+// Close closes the meter. Must be called to prevent resource leaking.
 func (m *Meter) Close() {
 	m.port.Close()
 }
@@ -63,11 +62,12 @@ func (m *Meter) Get(key []byte) (*model.Measurement, error) {
 }
 
 // Put is a noop.
+// TODO: Return an unsupported error.
 func (m *Meter) Put(*model.Measurement) error {
 	return nil
 }
 
-// GetN returns one measuerment.
+// GetN returns one measurement.
 func (m *Meter) GetN(n int) ([]*model.Measurement, error) {
 	mm, err := m.Get(nil)
 	if err != nil {
@@ -78,7 +78,8 @@ func (m *Meter) GetN(n int) ([]*model.Measurement, error) {
 	}, nil
 }
 
-// Delete is a noop.
+// Delete is a noop and should not be called.
+// TODO: return an Unsupported Error.
 func (m *Meter) Delete(*model.Measurement) error {
 	return nil
 }
