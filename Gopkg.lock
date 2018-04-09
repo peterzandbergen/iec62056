@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/creack/goselect"
   packages = ["."]
-  revision = "3adf2cd7aa679b2e107555d0d0427e75acca0db5"
+  revision = "176c667f75aaf12301181e3cbf69da406ba0fd99"
 
 [[projects]]
   branch = "master"
@@ -39,7 +39,7 @@
   revision = "714f901b98fdb3aa954b4193d8cbd64a28d80cad"
 
 [[projects]]
-  branch = "master"
+  branch = "v1"
   name = "go.bug.st/serial.v1"
   packages = [
     ".",
@@ -55,7 +55,7 @@
     "unix",
     "windows"
   ]
-  revision = "2f1e207ee39ff70f3433e49c6eb52677a515e3b5"
+  revision = "3b87a42e500a6dc65dae1a55d0b641295971163e"
 
 [solve-meta]
   analyzer-name = "dep"
