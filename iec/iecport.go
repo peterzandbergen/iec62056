@@ -42,7 +42,7 @@ type Port struct {
 }
 
 // newDefaulSettings returns portsettings with default settings.
-func newDefaulSettings() *PortSettings {
+func NewDefaultSettings() *PortSettings {
 	return &PortSettings{
 		BaudRateChangeDelay:    0,
 		InitialBaudRateModeABC: 300,
@@ -55,7 +55,7 @@ func newDefaulSettings() *PortSettings {
 // New creates a new port. If settings is nil, it uses the default settings.
 func New(settings *PortSettings) *Port {
 	if settings == nil {
-		settings = newDefaulSettings()
+		settings = NewDefaultSettings()
 	}
 	return &Port{
 		BaudRateChangeDelay:    settings.BaudRateChangeDelay,

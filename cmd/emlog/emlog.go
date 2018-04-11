@@ -1,12 +1,28 @@
 package main
 
 import (
+	"context"
 	"flag"
-	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"time"
 
+	"github.com/peterzandbergen/iec62056/actors"
+	"github.com/peterzandbergen/iec62056/adapters/cache"
+	"github.com/peterzandbergen/iec62056/model"
 	"github.com/spf13/pflag"
 )
 
+// Service type is used for long running services.
+type Service interface {
+	// Start starts the service. The call should return immediately.
+	Start()
+	// Stop stops the service and wait till the service stops.
+	Stop(ctx context.Context) error
+}
+
+// Options for the program.
 type options struct {
 	Baudrate         int
 	Portname         string
@@ -28,9 +44,75 @@ func (o *options) Parse() {
 	pflag.Parse()
 }
 
+// MeasurementHandler type is the handler for measurements.
+type MeasurementHandler struct {
+	repo model.MeasurementRepo
+}
+
+// Handle creates the actor and passes the measurement.
+func (h *MeasurementHandler) Handle(m *model.Measurement) {
+	// Create the actor to handle the message and store it in the repo.
+	a := actors.IecMessageHandler{
+		Measurement: m,
+		Repo:        h.repo,
+	}
+	// Call the actor Do function.
+	a.Do()
+}
+
+// BuildSamplerService builds a service using the given options.
+func BuildSamplerService(o options, repo model.MeasurementRepo) (Service, error) {
+	s, err := NewSampler(o.Portname, o.Baudrate, time.Duration(o.Interval)*time.Second)
+	if err != nil {
+		return nil, err
+	}
+	// Create the repo.
+	h := &MeasurementHandler{
+		repo: repo,
+	}
+	s.Handle(h)
+	return s, nil
+}
+
 func main() {
+	var services []Service
+
+	// Catch ctrl-C and kill signal.
+	c := make(chan os.Signal, 1)
+	signal.Notify(c)
+
+	// Process the options.
 	o := &options{}
 	o.Parse()
-	flag.PrintDefaults()
-	fmt.Printf("Baudrate: %d\nPortname: %s\nLocalcache: %s\n", o.Baudrate, o.Portname, o.LocalCache)
+
+	// Create the repositories.
+	localRepo, err := cache.Open(o.LocalCache)
+	if err != nil {
+		// Log and exit.
+		os.Exit(1)
+	}
+	defer localRepo.Close()
+
+	// Create the adapters.
+	// Start the meter sampler service.
+	var s Service
+	s, err = BuildSamplerService(*o, localRepo)
+	if err != nil {
+		log.Printf("cannot create sampler service: %s", err.Error())
+		os.Exit(1)
+	}
+	services = append(services, s)
+
+	// Wait for the end
+	<-c
+
+	// Perform clean up.
+	for _, s := range services {
+		ctx, done := context.WithTimeout(context.Background(), time.Second*time.Duration(10))
+		err := s.Stop(ctx)
+		done()
+		if err != nil {
+			// TODO: Log error
+		}
+	}
 }
