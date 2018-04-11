@@ -58,7 +58,7 @@ func (s *sampler) Handle(h SamplerHandler) {
 
 // Start blocks till Stop is called.
 func (s *sampler) Start() {
-	log.Println("sampler: Start called")
+	log.Printf("sampler: Start called with interval: %s\n", s.interval.String())
 	t := time.NewTicker(s.interval)
 	for {
 		select {
