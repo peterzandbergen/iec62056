@@ -34,6 +34,8 @@ type sampler struct {
 
 func NewSampler(port string, baudrate int, interval time.Duration) (*sampler, error) {
 	ps := iec.NewDefaultSettings()
+	ps.PortName = port
+	ps.InitialBaudRateModeABC = baudrate
 	m, err := meter.Open(*ps)
 	if err != nil {
 		return nil, err
