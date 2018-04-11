@@ -104,7 +104,8 @@ func main() {
 	services = append(services, s)
 
 	// Wait for the end
-	<-c
+	sig := <-c
+	log.Printf("Receive signal: %s\n", sig.String())
 
 	// Perform clean up.
 	for _, s := range services {
