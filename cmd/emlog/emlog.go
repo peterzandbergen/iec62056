@@ -75,6 +75,7 @@ func BuildSamplerService(o options, repo model.MeasurementRepo) (Service, error)
 }
 
 func main() {
+	log.Println("Starting emlog")
 	var services []Service
 
 	// Catch ctrl-C and kill signal.
@@ -104,10 +105,12 @@ func main() {
 	services = append(services, s)
 
 	// Wait for the end
+	log.Println("Services started")
 	sig := <-c
-	log.Printf("Receive signal: %s\n", sig.String())
+	log.Printf("Received signal: %s\n", sig.String())
 
 	// Perform clean up.
+	log.Println("Stopping services")
 	for _, s := range services {
 		ctx, done := context.WithTimeout(context.Background(), time.Second*time.Duration(10))
 		err := s.Stop(ctx)
@@ -116,4 +119,5 @@ func main() {
 			// TODO: Log error
 		}
 	}
+	log.Println("Services stopped")
 }
