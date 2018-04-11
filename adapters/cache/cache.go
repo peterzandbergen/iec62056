@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"math"
 
 	// This project.
 	"github.com/peterzandbergen/iec62056/model"
@@ -77,6 +78,9 @@ func (c *Cache) Get(key []byte) (*model.Measurement, error) {
 func (c *Cache) GetN(n int) ([]*model.Measurement, error) {
 	if c.db == nil {
 		return nil, ErrClosed
+	}
+	if n <= 0 {
+		n = math.MaxInt16
 	}
 	// Get an iterator.
 	it := c.db.NewIterator(nil, nil)

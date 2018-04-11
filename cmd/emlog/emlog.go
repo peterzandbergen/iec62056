@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -24,6 +25,7 @@ type Service interface {
 
 // Options for the program.
 type options struct {
+	DumpCache        bool
 	Baudrate         int
 	Portname         string
 	LocalCache       string
@@ -35,6 +37,7 @@ func (o *options) Parse() {
 	if flag.Parsed() {
 		return
 	}
+	pflag.BoolVarP(&o.DumpCache, "show-cache", "D", false, "Dump the content of the cache.")
 	pflag.IntVarP(&o.Baudrate, "baudrate", "b", 300, "Baudrate of the serial port connected to the energy meter.")
 	pflag.StringVarP(&o.Portname, "serial-port", "s", "/dev/ttyUSB0", "Device name of the serial port.")
 	pflag.StringVarP(&o.LocalCache, "local-cache-path", "l", "/tmp/emlog-cache", "Location of the local cache.")
@@ -93,6 +96,20 @@ func main() {
 		os.Exit(1)
 	}
 	defer localRepo.Close()
+
+	if o.DumpCache {
+		a := &actors.CacheDumper{
+			Repo: localRepo,
+		}
+		a.Do()
+		if a.Measurements != nil {
+			fmt.Printf("retrieved %d measurements\n", len(a.Measurements))
+			for _, m := range a.Measurements {
+				fmt.Printf("%+v", *m)
+			}
+		}
+		os.Exit(0)
+	}
 
 	// Create the adapters.
 	var s Service
