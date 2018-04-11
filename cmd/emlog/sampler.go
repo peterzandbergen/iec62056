@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"sync"
 	"time"
 
@@ -61,6 +62,7 @@ func (s *sampler) Start() {
 	for {
 		select {
 		case <-t.C:
+			log.Printf("sampler: calling meter.Get()")
 			m, err := s.meter.Get(nil)
 			if err != nil {
 				// log error
