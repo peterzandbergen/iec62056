@@ -58,6 +58,7 @@ func (s *sampler) Handle(h SamplerHandler) {
 
 // Start blocks till Stop is called.
 func (s *sampler) Start() {
+	log.Println("sampler: Start called")
 	t := time.NewTicker(s.interval)
 	for {
 		select {
@@ -70,6 +71,7 @@ func (s *sampler) Start() {
 				s.h.Handle(m)
 			}
 		case <-s.done:
+			log.Println("sampler: Done received, stopping")
 			t.Stop()
 			s.meter.Close()
 			close(s.stopped)
