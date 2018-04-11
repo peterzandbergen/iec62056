@@ -95,7 +95,6 @@ func main() {
 	defer localRepo.Close()
 
 	// Create the adapters.
-	// Start the meter sampler service.
 	var s Service
 	s, err = BuildSamplerService(*o, localRepo)
 	if err != nil {
@@ -103,6 +102,11 @@ func main() {
 		os.Exit(1)
 	}
 	services = append(services, s)
+
+	// Start the services.
+	for _, s := range services {
+		go s.Start()
+	}
 
 	// Wait for the end
 	log.Println("Services started")
