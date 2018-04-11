@@ -3,6 +3,7 @@ package iec
 import (
 	"bufio"
 	"errors"
+	"log"
 
 	"github.com/peterzandbergen/iec62056/iec/telegram"
 	"go.bug.st/serial.v1"
@@ -78,6 +79,7 @@ func (p *Port) Open(portName string) error {
 	var err error
 	p.port, err = serial.Open(portName, p.mode)
 	if err != nil {
+		log.Printf("cannot open serial port: %s", portName)
 		p.port = nil
 		return err
 	}
