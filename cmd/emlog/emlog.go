@@ -37,7 +37,7 @@ func (o *options) Parse() {
 	}
 	pflag.IntVarP(&o.Baudrate, "baudrate", "b", 300, "Baudrate of the serial port connected to the energy meter.")
 	pflag.StringVarP(&o.Portname, "serial-port", "s", "/dev/ttyUSB0", "Device name of the serial port.")
-	pflag.StringVarP(&o.LocalCache, "local-cache-path", "l", "~/.emlogcache", "Location of the local cache.")
+	pflag.StringVarP(&o.LocalCache, "local-cache-path", "l", "/tmp/emlog-cache", "Location of the local cache.")
 	pflag.StringVarP(&o.RemoteStorageURI, "remote-storage-uri", "R", "http://localhost:304725/emeterlog", "Remote Storage Service URI.")
 	pflag.IntVarP(&o.Interval, "interval", "I", 300, "Interval for each measurement in seconds.")
 
@@ -80,7 +80,7 @@ func main() {
 
 	// Catch ctrl-C and kill signal.
 	c := make(chan os.Signal, 1)
-	signal.Notify(c)
+	signal.Notify(c, os.Interrupt)
 
 	// Process the options.
 	o := &options{}

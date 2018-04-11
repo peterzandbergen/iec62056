@@ -61,15 +61,17 @@ func (s *sampler) Start() {
 	log.Printf("sampler: Start called with interval: %s\n", s.interval.String())
 	t := time.NewTicker(s.interval)
 	for {
+		log.Printf("sampler: calling meter.Get()")
+		m, err := s.meter.Get(nil)
+		if err != nil {
+			// log error
+		} else {
+			s.h.Handle(m)
+		}
+
 		select {
 		case <-t.C:
-			log.Printf("sampler: calling meter.Get()")
-			m, err := s.meter.Get(nil)
-			if err != nil {
-				// log error
-			} else {
-				s.h.Handle(m)
-			}
+			break
 		case <-s.done:
 			log.Println("sampler: Done received, stopping")
 			t.Stop()
