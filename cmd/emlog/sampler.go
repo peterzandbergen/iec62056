@@ -6,8 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/peterzandbergen/iec62056/adapters/meter"
-	"github.com/peterzandbergen/iec62056/iec"
+	_ "github.com/peterzandbergen/iec62056/iec"
 	"github.com/peterzandbergen/iec62056/model"
 )
 
@@ -27,26 +26,28 @@ func (sh SamplerHandlerFunc) Handle(m *model.Measurement) {
 type sampler struct {
 	mu       sync.Mutex
 	interval time.Duration
-	meter    *meter.Meter
 	done     chan struct{}
 	stopped  chan struct{}
 	h        SamplerHandler
 }
 
+// NewSampler creates a new sampler service.
+// TODO: refactor
 func NewSampler(port string, baudrate int, interval time.Duration) (*sampler, error) {
-	ps := iec.NewDefaultSettings()
-	ps.PortName = port
-	ps.InitialBaudRateModeABC = baudrate
-	m, err := meter.Open(*ps)
-	if err != nil {
-		return nil, err
-	}
-	s := &sampler{}
-	s.meter = m
-	s.done = make(chan struct{})
-	s.stopped = make(chan struct{})
-	s.interval = interval
-	return s, nil
+	// ps := iec.NewDefaultSettings()
+	// ps.PortName = port
+	// ps.InitialBaudRateModeABC = baudrate
+	// m, err := meter.Open(*ps)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// s := &sampler{}
+	// s.meter = m
+	// s.done = make(chan struct{})
+	// s.stopped = make(chan struct{})
+	// s.interval = interval
+	// return s, nil
+	return nil, nil
 }
 
 // Handle sets the handler for the
@@ -62,12 +63,12 @@ func (s *sampler) Start() {
 	t := time.NewTicker(s.interval)
 	for {
 		log.Printf("sampler: calling meter.Get()")
-		m, err := s.meter.Get(nil)
-		if err != nil {
-			// log error
-		} else {
-			s.h.Handle(m)
-		}
+		// m, err := s.meter.Get(nil)
+		// if err != nil {
+		// 	// log error
+		// } else {
+		// 	s.h.Handle(m)
+		// }
 
 		select {
 		case <-t.C:
@@ -75,7 +76,7 @@ func (s *sampler) Start() {
 		case <-s.done:
 			log.Println("sampler: Done received, stopping")
 			t.Stop()
-			s.meter.Close()
+			// s.meter.Close()
 			close(s.stopped)
 			return
 		}

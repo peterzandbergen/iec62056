@@ -11,6 +11,7 @@ import (
 
 	"github.com/peterzandbergen/iec62056/actors"
 	"github.com/peterzandbergen/iec62056/adapters/cache"
+	"github.com/peterzandbergen/iec62056/iec"
 	"github.com/peterzandbergen/iec62056/model"
 	"github.com/spf13/pflag"
 )
@@ -49,15 +50,18 @@ func (o *options) Parse() {
 
 // MeasurementHandler type is the handler for measurements.
 type MeasurementHandler struct {
-	repo model.MeasurementRepo
+	localRepo    model.MeasurementRepo
+	meterRepo    model.MeasurementRepo
+	retries      int
+	portSettings iec.PortSettings
 }
 
 // Handle creates the actor and passes the measurement.
 func (h *MeasurementHandler) Handle(m *model.Measurement) {
 	// Create the actor to handle the message and store it in the repo.
 	a := actors.IecMessageHandler{
-		Measurement: m,
-		Repo:        h.repo,
+		LocalRepo: h.localRepo,
+		MeterRepo: h.meterRepo,
 	}
 	// Call the actor Do function.
 	a.Do()
@@ -71,7 +75,9 @@ func BuildSamplerService(o options, repo model.MeasurementRepo) (Service, error)
 	}
 	// Create the repo.
 	h := &MeasurementHandler{
-		repo: repo,
+		localRepo:    repo,
+		meterRepo: nil,
+		retries: 5,
 	}
 	s.Handle(h)
 	return s, nil

@@ -1,6 +1,8 @@
 package meter
 
 import (
+	"errors"
+	"log"
 	"time"
 
 	"github.com/peterzandbergen/iec62056/iec"
@@ -9,38 +11,39 @@ import (
 
 // Meter type represents a meter for reading energy measuerments.
 type Meter struct {
-	port *iec.Port
+	// PortSettings for the serial port, needs to be set.
+	PortSettings *iec.PortSettings
+	// PortName needs to be set.
+	PortName string
+	// TimeOut for reading the meter in seconds. Default is 60.
+	TimeOut time.Duration
 }
 
+// Measurement is used internally.
+type measurement struct {
+	m   *model.Measurement
+	err error
+}
+
+// Check if the interface has been fully implemented.
 var _ model.MeasurementRepo = &Meter{}
 
-// Open returns a new meter on the port with the given port settings.
-// The caller needs to close the port when done using it.
-func Open(ps iec.PortSettings) (*Meter, error) {
-	p := iec.New(&ps)
-	err := p.Open(ps.PortName)
-	if err != nil {
-		return nil, err
+// ErrTimeout indicates that reading the meter took too long.
+var ErrTimeout = errors.New("timeout reading from meter")
+
+// Copy one reading.
+func copyReading(src iec.DataSet) (dst model.DataSet) {
+	return model.DataSet{
+		Address: src.Address,
+		Value:   src.Value,
+		Unit:    src.Unit,
 	}
-	return &Meter{
-		port: p,
-	}, nil
 }
 
-// Close closes the meter.
-// Must be called after a succesful open to prevent resource leaking.
-func (m *Meter) Close() {
-	m.port.Close()
-}
-
+// Copy all readings.
 func copyReadings(src []iec.DataSet) (dst []model.DataSet) {
 	for _, s := range src {
-		d := model.DataSet{
-			Address: s.Address,
-			Value:   s.Value,
-			Unit:    s.Unit,
-		}
-		dst = append(dst, d)
+		dst = append(dst, copyReading(s))
 	}
 	return dst
 }
@@ -49,17 +52,12 @@ func copyReadings(src []iec.DataSet) (dst []model.DataSet) {
 // The Key parameter is ignored and can be set to nil.
 func (m *Meter) Get(key []byte) (*model.Measurement, error) {
 	t := time.Now()
-	dm, err := m.port.Read()
+	mm, err := m.readWithTimeout()
 	if err != nil {
 		return nil, err
 	}
-
-	return &model.Measurement{
-		Time:           t,
-		ManufacturerID: dm.ManufacturerID,
-		Identification: dm.MeterID,
-		Readings:       copyReadings(dm.DataSets),
-	}, nil
+	mm.Time = t
+	return mm, nil
 }
 
 // Put is a noop and should not be called.
@@ -77,6 +75,62 @@ func (m *Meter) GetN(n int) ([]*model.Measurement, error) {
 	return []*model.Measurement{
 		mm,
 	}, nil
+}
+
+func copyMsgToMsm(msg *iec.DataMessage) *model.Measurement {
+	return &model.Measurement{
+		Identification: msg.MeterID,
+		ManufacturerID: msg.ManufacturerID,
+		Readings:       copyReadings(msg.DataSets),
+	}
+}
+
+func (m *Meter) readWithTimeout() (*model.Measurement, error) {
+	if m.TimeOut <= 0 {
+		m.TimeOut = 60
+	}
+	// Open the serial port repo.
+	port := iec.New(m.PortSettings)
+	err := port.Open(m.PortName)
+	if err != nil {
+		// Log error.
+		return nil, err
+	}
+	// Close the port when done.
+	defer port.Close()
+
+	// Sleep to make sure the port is ready.
+	time.Sleep(500 * time.Millisecond)
+	// Channel to receive the measurement message.
+	mc := make(chan *measurement)
+	// Perform measurement in the background.
+	go func() {
+		msg := &measurement{}
+		dm, err := port.Read()
+		if err != nil {
+			msg.err = err
+			mc <- msg
+			return
+		}
+		msg.m, msg.err = copyMsgToMsm(dm), nil
+		mc <- msg
+	}()
+	// Wait for measurement or timeout.
+	select {
+	case <-time.NewTimer(m.TimeOut * time.Second).C:
+		// Log timeout reading measurement.
+		log.Printf("timeout reading a measurement")
+		return nil, ErrTimeout
+	case msg := <-mc:
+		// Measurement or error received.
+		if msg.err != nil {
+			// Log error reading measurement.
+			log.Printf("error reading a measurement: %s", msg.err.Error())
+			return nil, msg.err
+		}
+		return msg.m, nil
+	}
+
 }
 
 // Delete is a noop and should not be called.
