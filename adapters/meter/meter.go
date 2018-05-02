@@ -14,8 +14,8 @@ type Meter struct {
 
 var _ model.MeasurementRepo = &Meter{}
 
-// Open returns a new meter on the port.
-// It will open the port.
+// Open returns a new meter on the port with the given port settings.
+// The caller needs to close the port when done using it.
 func Open(ps iec.PortSettings) (*Meter, error) {
 	p := iec.New(&ps)
 	err := p.Open(ps.PortName)
@@ -27,7 +27,8 @@ func Open(ps iec.PortSettings) (*Meter, error) {
 	}, nil
 }
 
-// Close closes the meter. Must be called to prevent resource leaking.
+// Close closes the meter.
+// Must be called after a succesful open to prevent resource leaking.
 func (m *Meter) Close() {
 	m.port.Close()
 }
@@ -45,7 +46,7 @@ func copyReadings(src []iec.DataSet) (dst []model.DataSet) {
 }
 
 // Get returns a measurement from the meter.
-// Key is not used and should be set to nil.
+// The Key parameter is ignored and can be set to nil.
 func (m *Meter) Get(key []byte) (*model.Measurement, error) {
 	t := time.Now()
 	dm, err := m.port.Read()
@@ -61,7 +62,7 @@ func (m *Meter) Get(key []byte) (*model.Measurement, error) {
 	}, nil
 }
 
-// Put is a noop.
+// Put is a noop and should not be called.
 // TODO: Return an unsupported error.
 func (m *Meter) Put(*model.Measurement) error {
 	return nil

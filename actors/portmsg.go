@@ -38,6 +38,10 @@ func (h *IecMessageHandler) Do() {
 	log.Print("number of retries exceeded")
 }
 
+// doOnce reads one measurement from the meter with one minute timeout.
+// When successful, the measurement is put in the repo.
+// The repo should be already opened and will not be closed.
+// It opens and closes the meter.
 func (h *IecMessageHandler) doOnce() error {
 	// Open the serial port repo.
 	m, err := meter.Open(h.PortSettings)
