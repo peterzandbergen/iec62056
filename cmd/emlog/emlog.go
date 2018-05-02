@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -90,24 +89,27 @@ func main() {
 	o.Parse()
 
 	// Create the repositories.
+	// Local cache.
 	localRepo, err := cache.Open(o.LocalCache)
 	if err != nil {
 		// Log and exit.
 		os.Exit(1)
 	}
 	defer localRepo.Close()
+	// Meter
+	// TODO: Create the meter repo.
+
+	// Create the services and the handlers.
+	// The measurement service.
+	// The status REST service.
+	// The save to cloud service.
 
 	if o.DumpCache {
 		a := &actors.CacheDumper{
-			Repo: localRepo,
+			Repo:   localRepo,
+			Writer: os.Stdout,
 		}
 		a.Do()
-		if a.Measurements != nil {
-			fmt.Printf("retrieved %d measurements\n", len(a.Measurements))
-			for _, m := range a.Measurements {
-				fmt.Printf("%+v", *m)
-			}
-		}
 		os.Exit(0)
 	}
 
