@@ -32,26 +32,27 @@ func TestGetTwo(t *testing.T) {
 	}
 	msm, err := m.Get(nil)
 	if err != nil {
-		if err != ErrTimeout {
-			t.Fatalf("Get failed, error: %s", err.Error())
-		} else {
-			t.Logf("Get failed on timeout: %s", err.Error())
-		}
+		t.Logf("Get failed, error: %s", err.Error())
 	} else {
 		t.Logf("Measurement 1: %v", *msm)
 	}
 
 	// Try again.
-	var st = 10 * time.Second
+	var st = 5 * time.Second
 	time.Sleep(st)
 	msm, err = m.Get(nil)
 	if err != nil {
-		if err != ErrTimeout {
-			t.Fatalf("Get failed, error: %s", err.Error())
-		} else {
-			t.Logf("Get failed on timeout: %s", err.Error())
-		}
+		t.Logf("Get failed, error: %s", err.Error())
 	} else {
 		t.Logf("Measurement 2: %v", *msm)
+	}
+
+	// Try again.
+	time.Sleep(st)
+	msm, err = m.Get(nil)
+	if err != nil {
+		t.Logf("Get failed, error: %s", err.Error())
+	} else {
+		t.Logf("Measurement 3: %v", *msm)
 	}
 }
