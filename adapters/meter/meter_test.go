@@ -32,16 +32,20 @@ func TestGetTwo(t *testing.T) {
 	}
 	msm, err := m.Get(nil)
 	if err != nil {
-		t.Fatalf("Get failed, error: %s", err.Error())
+		t.Errorf("Get failed, error: %s", err.Error())
 	}
-	t.Logf("Measurement 1: %v", *msm)
+	if msm != nil {
+		t.Logf("Measurement 1: %v", *msm)
+	}
 
 	// Try again.
 	var st = 10 * time.Second
 	time.Sleep(st)
 	msm, err = m.Get(nil)
 	if err != nil {
-		t.Fatalf("Get failed, error: %s", err.Error())
+		t.Errorf("Get failed, error: %s", err.Error())
 	}
-	t.Logf("Measurement 2: %v", *msm)
+	if msm != nil {
+		t.Logf("Measurement 2: %v", *msm)
+	}
 }
