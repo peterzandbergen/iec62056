@@ -32,7 +32,7 @@ func TestGetTwo(t *testing.T) {
 	}
 	msm, err := m.Get(nil)
 	if err != nil {
-		t.Logf("Get failed, error: %s", err.Error())
+		t.Errorf("Get failed, error: %s", err.Error())
 	} else {
 		t.Logf("Measurement 1: %v", *msm)
 	}
@@ -42,7 +42,7 @@ func TestGetTwo(t *testing.T) {
 	time.Sleep(st)
 	msm, err = m.Get(nil)
 	if err != nil {
-		t.Logf("Get failed, error: %s", err.Error())
+		t.Errorf("Get failed, error: %s", err.Error())
 	} else {
 		t.Logf("Measurement 2: %v", *msm)
 	}
@@ -51,7 +51,7 @@ func TestGetTwo(t *testing.T) {
 	time.Sleep(st)
 	msm, err = m.Get(nil)
 	if err != nil {
-		t.Logf("Get failed, error: %s", err.Error())
+		t.Errorf("Get failed, error: %s", err.Error())
 	} else {
 		t.Logf("Measurement 3: %v", *msm)
 	}
