@@ -6,9 +6,12 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/peterzandbergen/iec62056/iec"
+	"github.com/peterzandbergen/iec62056/iec"
 	"github.com/peterzandbergen/iec62056/model"
 )
+
+// TODO: Remove when done.
+var iecHold *iec.DataMessage
 
 // SamplerHandler interface should be implemented by Measurement handlers.
 type SamplerHandler interface {
@@ -33,7 +36,7 @@ type sampler struct {
 
 // NewSampler creates a new sampler service.
 // TODO: refactor
-func NewSampler(port string, baudrate int, interval time.Duration) (*sampler, error) {
+func newSampler(port string, baudrate int, interval time.Duration) (*sampler, error) {
 	// ps := iec.NewDefaultSettings()
 	// ps.PortName = port
 	// ps.InitialBaudRateModeABC = baudrate
@@ -62,6 +65,8 @@ func (s *sampler) Start() {
 	log.Printf("sampler: Start called with interval: %s\n", s.interval.String())
 	t := time.NewTicker(s.interval)
 	for {
+		// Create the actor.
+		// call Do.
 		log.Printf("sampler: calling meter.Get()")
 		// m, err := s.meter.Get(nil)
 		// if err != nil {

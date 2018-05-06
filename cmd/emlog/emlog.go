@@ -68,15 +68,15 @@ func (h *MeasurementHandler) Handle(m *model.Measurement) {
 
 // BuildSamplerService builds a service using the given options.
 func BuildSamplerService(o options, repo model.MeasurementRepo) (Service, error) {
-	s, err := NewSampler(o.Portname, o.Baudrate, time.Duration(o.Interval)*time.Second)
+	s, err := newSampler(o.Portname, o.Baudrate, time.Duration(o.Interval)*time.Second)
 	if err != nil {
 		return nil, err
 	}
 	// Create the repo.
 	h := &MeasurementHandler{
-		localRepo:    repo,
+		localRepo: repo,
 		meterRepo: nil,
-		retries: 5,
+		retries:   5,
 	}
 	s.Handle(h)
 	return s, nil
@@ -107,10 +107,12 @@ func main() {
 
 	// Create the services and the handlers.
 	// The measurement service.
+
 	// The status REST service.
 	// The save to cloud service.
 
 	if o.DumpCache {
+		// Create and start the CacheDumper.
 		a := &actors.CacheDumper{
 			Repo:   localRepo,
 			Writer: os.Stdout,

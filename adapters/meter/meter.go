@@ -10,6 +10,7 @@ import (
 )
 
 // Meter type represents a meter for reading energy measuerments.
+// The timeout should be long enough for slow meters to return the measurement, default is 60 seconds.
 type Meter struct {
 	// PortSettings for the serial port, needs to be set.
 	PortSettings *iec.PortSettings
@@ -85,6 +86,8 @@ func copyMsgToMsm(msg *iec.DataMessage) *model.Measurement {
 	}
 }
 
+// readWithTimeout opens the port with the correct settings and reads a value.
+// Limits the time to read the measurement with the configured timeout.
 func (m *Meter) readWithTimeout() (*model.Measurement, error) {
 	if m.TimeOut <= 0 {
 		m.TimeOut = 60
@@ -130,7 +133,6 @@ func (m *Meter) readWithTimeout() (*model.Measurement, error) {
 		}
 		return msg.m, nil
 	}
-
 }
 
 // Delete is a noop and should not be called.

@@ -16,18 +16,19 @@ type IecMessageHandler struct {
 // Do performs the actor task.
 // Open the serial port repo, Get a message, and store it in the local cache.
 // Performs a timeout on the Get to prevent blocking.
-func (h *IecMessageHandler) Do() {
+func (h *IecMessageHandler) Do() error {
 	m, err := h.MeterRepo.Get(nil)
 	if err != nil {
 		// Log error
 		log.Printf("Error getting measuerment from reader, error: %s", err.Error())
-		return
+		return err
 	}
 	err = h.LocalRepo.Put(m)
 	if err != nil {
 		// Log error.
 		log.Printf("Error storing to local cache, error: %s", err.Error())
-		return
+		return err
 	}
 	log.Printf("Stored measurement from %s", m.Identification)
+	return nil
 }

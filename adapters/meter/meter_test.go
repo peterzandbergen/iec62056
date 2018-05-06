@@ -10,15 +10,15 @@ var portSettings = iec.PortSettings{
 	PortName: "/dev/ttyUSB0",
 }
 
-func TestOpenAndClose(t *testing.T) {
-	ps := portSettings
-	m, err := Open(ps)
-	if err != nil {
-		t.Fatalf("Open, error: %s", err.Error())
-	}
-	defer m.Close()
-}
-
 func TestGet(t *testing.T) {
-
+	ps := iec.NewDefaultSettings()
+	m := &Meter{
+		PortSettings: ps,
+		PortName:     "/dev/null",
+	}
+	msm, err := m.Get(nil)
+	if err != nil {
+		t.Fatalf("Get failed, error: %s", err.Error())
+	}
+	t.Logf("Measurement: %v", *msm)
 }
