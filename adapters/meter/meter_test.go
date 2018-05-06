@@ -4,8 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/peterzandbergen/iec62056/adapters/meter"
-
 	"github.com/peterzandbergen/iec62056/iec"
 )
 
@@ -34,7 +32,7 @@ func TestGetTwo(t *testing.T) {
 	}
 	msm, err := m.Get(nil)
 	if err != nil {
-		if err != meter.ErrTimeout {
+		if err != ErrTimeout {
 			t.Fatalf("Get failed, error: %s", err.Error())
 		} else {
 			t.Logf("Get failed on timeout: %s", err.Error())
@@ -48,7 +46,7 @@ func TestGetTwo(t *testing.T) {
 	time.Sleep(st)
 	msm, err = m.Get(nil)
 	if err != nil {
-		if err != meter.ErrTimeout {
+		if err != ErrTimeout {
 			t.Fatalf("Get failed, error: %s", err.Error())
 		} else {
 			t.Logf("Get failed on timeout: %s", err.Error())
