@@ -70,7 +70,7 @@ func (s *serviceList) Start(ctx context.Context) error {
 		}
 	}
 	if se.empty() {
-		se = nil
+		return nil
 	}
 	return se
 }
