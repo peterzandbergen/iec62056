@@ -8,20 +8,16 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/peterzandbergen/iec62056/model"
+
+	"github.com/peterzandbergen/iec62056/adapters/meter"
+
 	"github.com/peterzandbergen/iec62056/actors"
 	"github.com/peterzandbergen/iec62056/adapters/cache"
 	"github.com/peterzandbergen/iec62056/iec"
-	"github.com/peterzandbergen/iec62056/model"
+	"github.com/peterzandbergen/iec62056/service"
 	"github.com/spf13/pflag"
 )
-
-// Service type is used for long running services.
-type Service interface {
-	// Start starts the service. The call should return immediately.
-	Start()
-	// Stop stops the service and wait till the service stops.
-	Stop(ctx context.Context) error
-}
 
 // Options for the program.
 type options struct {
@@ -47,44 +43,29 @@ func (o *options) Parse() {
 	pflag.Parse()
 }
 
-// MeasurementHandler type is the handler for measurements.
-type MeasurementHandler struct {
-	localRepo    model.MeasurementRepo
-	meterRepo    model.MeasurementRepo
-	retries      int
-	portSettings iec.PortSettings
+func buildTimerHandler(meterRepo, localRepo model.MeasurementRepo) service.TimerHandler {
+	return service.TimerHandleFunc(func(t time.Time) {
+		a := actors.IecMessageHandler{
+			LocalRepo: localRepo,
+			MeterRepo: meterRepo,
+		}
+		a.Do()
+	})
 }
 
-// Handle creates the actor and passes the measurement.
-func (h *MeasurementHandler) Handle(m *model.Measurement) {
-	// Create the actor to handle the message and store it in the repo.
-	a := actors.IecMessageHandler{
-		LocalRepo: h.localRepo,
-		MeterRepo: h.meterRepo,
+func buildMeterRepo(options *options) *meter.Meter {
+	ps := iec.NewDefaultSettings()
+	ps.PortName = options.Portname
+	ps.InitialBaudRateModeABC = options.Baudrate
+	mr := &meter.Meter{
+		PortName:     options.Portname,
+		PortSettings: ps,
 	}
-	// Call the actor Do function.
-	a.Do()
-}
-
-// BuildSamplerService builds a service using the given options.
-func BuildSamplerService(o options, repo model.MeasurementRepo) (Service, error) {
-	s, err := newSampler(o.Portname, o.Baudrate, time.Duration(o.Interval)*time.Second)
-	if err != nil {
-		return nil, err
-	}
-	// Create the repo.
-	h := &MeasurementHandler{
-		localRepo: repo,
-		meterRepo: nil,
-		retries:   5,
-	}
-	s.Handle(h)
-	return s, nil
+	return mr
 }
 
 func main() {
 	log.Println("Starting emlog")
-	var services []Service
 
 	// Catch ctrl-C and kill signal.
 	c := make(chan os.Signal, 1)
@@ -102,14 +83,21 @@ func main() {
 		os.Exit(1)
 	}
 	defer localRepo.Close()
+
 	// Meter
-	// TODO: Create the meter repo.
+	meterRepo := buildMeterRepo(o)
+	if meterRepo == nil {
+		log.Println("cannot open the meter repo")
+		os.Exit(1)
+	}
 
-	// Create the services and the handlers.
+	// Create the services.
+
 	// The measurement service.
+	timerSvc := service.NewTimer(time.Duration(o.Interval)*time.Second, buildTimerHandler(meterRepo, localRepo))
 
-	// The status REST service.
-	// The save to cloud service.
+	// TODO: The status REST service.
+	// TODO: The save to cloud service.
 
 	if o.DumpCache {
 		// Create and start the CacheDumper.
@@ -121,18 +109,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	// Create the adapters.
-	var s Service
-	s, err = BuildSamplerService(*o, localRepo)
-	if err != nil {
-		log.Printf("cannot create sampler service: %s", err.Error())
-		os.Exit(1)
-	}
-	services = append(services, s)
+	// Create services list.
+	services := service.NewServicesList(timerSvc)
 
-	// Start the services.
-	for _, s := range services {
-		go s.Start()
+	if err := services.Start(context.Background()); err != nil {
+		log.Printf("error stating the services: %s", err.Error())
+		os.Exit(1)
 	}
 
 	// Wait for the end
@@ -142,13 +124,7 @@ func main() {
 
 	// Perform clean up.
 	log.Println("Stopping services")
-	for _, s := range services {
-		ctx, done := context.WithTimeout(context.Background(), time.Second*time.Duration(10))
-		err := s.Stop(ctx)
-		done()
-		if err != nil {
-			// TODO: Log error
-		}
-	}
+	services.Stop(context.Background())
+
 	log.Println("Services stopped")
 }

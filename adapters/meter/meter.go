@@ -140,3 +140,18 @@ func (m *Meter) readWithTimeout() (*model.Measurement, error) {
 func (m *Meter) Delete(*model.Measurement) error {
 	return nil
 }
+
+// PortExists tests if the port exists and can be opened.
+// Should only be called once for it will interfere with a Get call.
+func (m *Meter) PortExists() bool {
+	// Open the serial port repo.
+	port := iec.New(m.PortSettings)
+	err := port.Open(m.PortName)
+	if err != nil {
+		// Log error.
+		return false
+	}
+	// Close the port when done.
+	defer port.Close()
+	return true
+}
