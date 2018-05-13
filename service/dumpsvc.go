@@ -22,9 +22,11 @@ type GetAllHandler struct {
 	server *HttpLocalService
 }
 
-// func createMeasurements(msm []*model.Measurement) {
-
-// }
+type MeasurementsResponse struct {
+	FirstTime    time.Time
+	LastTime     time.Time
+	Measurements []*model.Measurement
+}
 
 func NewHttpLocalService(address string, repo model.MeasurementRepo) Service {
 	sm := &http.ServeMux{}
@@ -53,13 +55,20 @@ func (h *GetAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	msm, err := a.GetAll()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("internal error: %s", err.Error()), http.StatusInternalServerError)
+		return
 	}
-
+	response := &MeasurementsResponse{
+		FirstTime:    msm[0].Time,
+		LastTime:     msm[len(msm)-1].Time,
+		Measurements: msm,
+	}
+	// Content type
 	w.Header().Set("Content-Type", "application/json")
 	// Take the output and serialize to the writer.
-	j, err := json.Marshal(msm)
+	j, err := json.Marshal(response)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("internal error: %s", err.Error()), http.StatusInternalServerError)
+		return
 	}
 	log.Printf("writing measurements response...")
 	w.Write(j)
