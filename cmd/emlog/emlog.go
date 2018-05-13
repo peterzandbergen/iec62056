@@ -113,8 +113,8 @@ func main() {
 	}
 
 	// Create services list.
-	// services := service.NewServicesList(timerSvc, localRestSvc)
-	services := service.NewServicesList(localRestSvc)
+	services := service.NewServicesList(timerSvc, localRestSvc)
+	// services := service.NewServicesList(localRestSvc)
 
 	if err := services.Start(context.Background()); err != nil {
 		log.Printf("error stating the services: %s", err.Error())
