@@ -67,8 +67,12 @@ func (m *Meter) Put(*model.Measurement) error {
 	return nil
 }
 
-// GetN returns one measurement.
-func (m *Meter) GetN(n int) ([]*model.Measurement, error) {
+func (m *Meter) GetAll() ([]*model.Measurement, error) {
+	return m.GetPage(0, 1)
+}
+
+// GetPage returns one measurement.
+func (m *Meter) GetPage(page, pagesize int) ([]*model.Measurement, error) {
 	mm, err := m.Get(nil)
 	if err != nil {
 		return nil, err

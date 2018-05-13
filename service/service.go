@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 )
 
 var (
@@ -78,9 +79,11 @@ func (s *serviceList) Start(ctx context.Context) error {
 func (s *serviceList) Stop(ctx context.Context) error {
 	se := &svcError{}
 	for _, s := range s.services {
-		if err := s.Stop(ctx); err != nil {
+		tctx, cancel := context.WithTimeout(ctx, time.Duration(30)*time.Second)
+		if err := s.Stop(tctx); err != nil {
 			se.add(err)
 		}
+		cancel()
 	}
 	if se.empty() {
 		return nil

@@ -95,8 +95,11 @@ func main() {
 
 	// The measurement service.
 	timerSvc := service.NewTimer(time.Duration(o.Interval)*time.Second, buildTimerHandler(meterRepo, localRepo))
+	_ = timerSvc
 
 	// TODO: The status REST service.
+	localRestSvc := service.NewHttpLocalService("0.0.0.0:8080", localRepo)
+
 	// TODO: The save to cloud service.
 
 	if o.DumpCache {
@@ -110,7 +113,8 @@ func main() {
 	}
 
 	// Create services list.
-	services := service.NewServicesList(timerSvc)
+	// services := service.NewServicesList(timerSvc, localRestSvc)
+	services := service.NewServicesList(localRestSvc)
 
 	if err := services.Start(context.Background()); err != nil {
 		log.Printf("error stating the services: %s", err.Error())

@@ -6,7 +6,8 @@ import "time"
 type MeasurementRepo interface {
 	Put(*Measurement) error
 	Get(key []byte) (*Measurement, error)
-	GetN(n int) ([]*Measurement, error)
+	GetPage(page, pagesize int) ([]*Measurement, error)
+	GetAll() ([]*Measurement, error)
 	Delete(*Measurement) error
 }
 

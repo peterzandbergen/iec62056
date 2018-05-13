@@ -136,7 +136,7 @@ func TestGetNMeasurement(t *testing.T) {
 	}
 
 	n := 1000
-	ms, err := c.GetN(n)
+	ms, err := c.GetPage(0, n)
 	if err != nil {
 		t.Fatalf("error get: %s", err.Error())
 	}

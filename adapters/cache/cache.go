@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"math"
 
 	// This project.
 	"github.com/peterzandbergen/iec62056/model"
@@ -28,6 +27,8 @@ var _ model.MeasurementRepo = &Cache{}
 var (
 	ErrNotImplemented = errors.New("not implemented")
 	ErrClosed         = errors.New("db closed")
+	ErrBadArguments   = errors.New("bad argument(s)")
+	ErrNoElements     = errors.New("no elements")
 )
 
 func marshalMeasurement(m *model.Measurement) ([]byte, error) {
@@ -75,12 +76,9 @@ func (c *Cache) Get(key []byte) (*model.Measurement, error) {
 	return m, nil
 }
 
-func (c *Cache) GetN(n int) ([]*model.Measurement, error) {
+func (c *Cache) GetAll() ([]*model.Measurement, error) {
 	if c.db == nil {
 		return nil, ErrClosed
-	}
-	if n <= 0 {
-		n = math.MaxInt16
 	}
 	// Get an iterator.
 	it := c.db.NewIterator(nil, nil)
@@ -88,8 +86,41 @@ func (c *Cache) GetN(n int) ([]*model.Measurement, error) {
 		return nil, it.Error()
 	}
 	defer it.Release()
-	ms := make([]*model.Measurement, 0, n)
-	for i := 0; i < n && it.Next(); i++ {
+	ms := make([]*model.Measurement, 0)
+	for it.Next() {
+		if v, err := unmarshalMeasurement(it.Value()); err != nil {
+		} else {
+			ms = append(ms, v)
+		}
+	}
+	return ms, nil
+}
+
+// GetPage returns pagesize items from the given page. Page starts at 0.
+func (c *Cache) GetPage(page, pagesize int) ([]*model.Measurement, error) {
+	if c.db == nil {
+		return nil, ErrClosed
+	}
+	// Check if page and page size are larger than 0.
+	if page < 0 || pagesize < 0 {
+		return nil, ErrBadArguments
+	}
+	// Get an iterator.
+	it := c.db.NewIterator(nil, nil)
+	if it.Error() != nil {
+		return nil, it.Error()
+	}
+	defer it.Release()
+	skip := page * pagesize
+	// Skip to first element.
+	for skip > 0 && it.Next() {
+		skip--
+	}
+	if skip > 0 {
+		return nil, ErrNoElements
+	}
+	ms := make([]*model.Measurement, 0)
+	for i := 0; i < pagesize && it.Next(); i++ {
 		if v, err := unmarshalMeasurement(it.Value()); err != nil {
 		} else {
 			ms = append(ms, v)
