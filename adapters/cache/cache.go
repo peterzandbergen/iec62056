@@ -112,16 +112,15 @@ func (c *Cache) GetPage(page, pagesize int) ([]*model.Measurement, error) {
 	}
 	defer it.Release()
 	// Skip one less, because the loop filling the result will alway perform an initial Next.
-	skip := page*pagesize - 1
+	skip := page * pagesize
 	// Skip to first element.
-	for skip > 0 && it.Next() {
-		skip--
+	for ; skip > 0 && it.Next(); skip-- {
 	}
 	if skip > 0 {
 		return nil, ErrNoElements
 	}
 	ms := make([]*model.Measurement, 0)
-	for i := 0; i < pagesize && it.Next(); i++ {
+	for i := pagesize; i > 0 && it.Next(); i-- {
 		if v, err := unmarshalMeasurement(it.Value()); err != nil {
 		} else {
 			ms = append(ms, v)
@@ -139,7 +138,7 @@ func (c *Cache) Delete(m *model.Measurement) error {
 	return err
 }
 
-// Cache type wraps the cache. The cache is used to store the messages until the can be sent to the cloud storage.
+// Cache type wraps the leveldb. The cache stores the messages until the can be sent to the cloud storage.
 // This allows us to keep recording, even when network access is down.
 // Cache implements the
 type Cache struct {
