@@ -111,7 +111,8 @@ func (c *Cache) GetPage(page, pagesize int) ([]*model.Measurement, error) {
 		return nil, it.Error()
 	}
 	defer it.Release()
-	skip := page * pagesize
+	// Skip one less, because the loop filling the result will alway perform an initial Next.
+	skip := page*pagesize - 1
 	// Skip to first element.
 	for skip > 0 && it.Next() {
 		skip--

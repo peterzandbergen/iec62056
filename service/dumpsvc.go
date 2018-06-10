@@ -30,9 +30,10 @@ type GetAllHandler struct {
 }
 
 type MeasurementsResponse struct {
-	FirstTime    time.Time `json:"omitempty"`
-	LastTime     time.Time `json:"omitempty"`
-	Measurements []*model.Measurement
+	FirstTime            time.Time `json:"omitempty"`
+	LastTime             time.Time `json:"omitempty"`
+	NumberOfMeasurements int
+	Measurements         []*model.Measurement
 }
 
 type errPagination struct {
@@ -143,7 +144,8 @@ func (h *GetAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response := &MeasurementsResponse{
-		Measurements: msm,
+		Measurements:         msm,
+		NumberOfMeasurements: len(msm),
 	}
 	if !pag.paginate() {
 		response.FirstTime = msm[0].Time
