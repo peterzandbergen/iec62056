@@ -30,8 +30,8 @@ type GetAllHandler struct {
 }
 
 type MeasurementsResponse struct {
-	FirstTime    time.Time
-	LastTime     time.Time
+	FirstTime    time.Time `json:"omitempty"`
+	LastTime     time.Time `json:"omitempty"`
 	Measurements []*model.Measurement
 }
 
@@ -143,9 +143,11 @@ func (h *GetAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response := &MeasurementsResponse{
-		FirstTime:    msm[0].Time,
-		LastTime:     msm[len(msm)-1].Time,
 		Measurements: msm,
+	}
+	if !pag.paginate() {
+		response.FirstTime = msm[0].Time
+		response.LastTime = msm[len(msm)-1].Time
 	}
 	// Content type
 	w.Header().Set("Content-Type", "application/json")
