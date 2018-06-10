@@ -120,11 +120,16 @@ func (c *Cache) GetPage(page, pagesize int) ([]*model.Measurement, error) {
 		return nil, ErrNoElements
 	}
 	ms := make([]*model.Measurement, 0)
+	hasElements := false
 	for i := pagesize; i > 0 && it.Next(); i-- {
 		if v, err := unmarshalMeasurement(it.Value()); err != nil {
 		} else {
 			ms = append(ms, v)
+			hasElements = true
 		}
+	}
+	if !hasElements {
+		return nil, ErrNoElements
 	}
 	return ms, nil
 }
