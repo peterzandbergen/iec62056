@@ -46,7 +46,7 @@ func TestLimitOnly(t *testing.T) {
 
 func TestPageOnly(t *testing.T) {
 	// Create a test request.
-	r := httptest.NewRequest("GET", "http://localhost/measurements/?page=100", nil)
+	r := httptest.NewRequest("GET", "http://localhost/measurements?page=100", nil)
 	p := NewPagination(r)
 	if p.err == nil {
 		t.Fatalf("expected error")
@@ -68,5 +68,104 @@ func TestPaginationOnly(t *testing.T) {
 	}
 	if p.page != 200 {
 		t.Fatalf("expected %d, got %d", 200, p.page)
+	}
+}
+
+func TestContextAll(t *testing.T) {
+	// Create a test request.
+	r := httptest.NewRequest("GET", "http://localhost/measurements", nil)
+	c := getContext(r)
+	if c.err != nil {
+		t.Errorf("unexptected error: %s", c.err.Error())
+	}
+	if c.first {
+		t.Error("first is true")
+	}
+	if c.last {
+		t.Error("last is true")
+	}
+	if c.pag.paginate() {
+		t.Error("paginage is true")
+	}
+}
+
+func TestContextAllSlash(t *testing.T) {
+	// Create a test request.
+	r := httptest.NewRequest("GET", "http://localhost/measurements/", nil)
+	c := getContext(r)
+	if c.err != nil {
+		t.Errorf("unexptected error: %s", c.err.Error())
+	}
+	if c.first {
+		t.Error("first is true")
+	}
+	if c.last {
+		t.Error("last is true")
+	}
+	if c.pag.paginate() {
+		t.Error("paginage is true")
+	}
+}
+
+func TestContextFirst(t *testing.T) {
+	// Create a test request.
+	r := httptest.NewRequest("GET", "http://localhost/measurements/first", nil)
+	c := getContext(r)
+	if c.err != nil {
+		t.Errorf("unexptected error: %s", c.err.Error())
+	}
+	if !c.first {
+		t.Error("first is false")
+	}
+	if c.last {
+		t.Error("last is true")
+	}
+	if c.pag != nil && c.pag.paginate() {
+		t.Error("paginage is true")
+	}
+}
+
+func TestContextLast(t *testing.T) {
+	// Create a test request.
+	r := httptest.NewRequest("GET", "http://localhost/measurements/last", nil)
+	c := getContext(r)
+	if c.err != nil {
+		t.Errorf("unexptected error: %s", c.err.Error())
+	}
+	if c.first {
+		t.Error("first is true")
+	}
+	if !c.last {
+		t.Error("last is false")
+	}
+	if c.pag != nil && c.pag.paginate() {
+		t.Error("paginage is true")
+	}
+}
+
+func TestContextPaginate(t *testing.T) {
+	// Create a test request.
+	r := httptest.NewRequest("GET", "http://localhost/measurements?page=100&size=200", nil)
+	c := getContext(r)
+	if c.err != nil {
+		t.Errorf("unexptected error: %s", c.err.Error())
+	}
+	if c.first {
+		t.Error("first is true")
+	}
+	if c.last {
+		t.Error("last is true")
+	}
+	if c.pag == nil {
+		t.Error("c.pag is nil")
+	}
+	if c.pag != nil && !c.pag.paginate() {
+		t.Error("paginage is false")
+	}
+	if c.pag.page != 100 {
+		t.Error("page != 100")
+	}
+	if c.pag.size != 200 {
+		t.Error("size != 200")
 	}
 }

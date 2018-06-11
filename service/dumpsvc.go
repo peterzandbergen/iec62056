@@ -34,6 +34,8 @@ type MeasurementsResponse struct {
 	LastTime             time.Time `json:"omitempty"`
 	NumberOfMeasurements int
 	Measurements         []*model.Measurement
+	First                *model.Measurement `json:"omitempty"`
+	Last                 *model.Measurement `json:"omitempty"`
 }
 
 type errPagination struct {
@@ -115,46 +117,131 @@ func NewHttpLocalService(address string, repo model.MeasurementRepo) Service {
 	return svc
 }
 
-// ServeHTTP reads all entries from the local repo and returns the JSON.
-func (h *GetAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// Create an actor.
-	a := &actors.PagerActor{
-		Repo: h.server.localRepo,
+type requestContext struct {
+	first, last bool
+	err         error
+	pag         *pagination
+}
+
+const (
+	path      = "/measurements"
+	pathSlash = "/measurements/"
+	firstPath = "/measurements/first"
+	lastPath  = "/measurements/last"
+)
+
+func getContext(r *http.Request) *requestContext {
+	// Determine first and last.
+	c := &requestContext{}
+	p := strings.ToLower(r.URL.Path)
+	switch {
+	case strings.HasPrefix(p, firstPath):
+		c.first = true
+		return c
+	case strings.HasPrefix(p, lastPath):
+		c.last = true
+		return c
+	case p == path, p == pathSlash:
+		break
+	default:
+		c.err = ErrBadParameter
+		return c
 	}
+
 	// Determine the pagination parameters.
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, fmt.Sprintf("bad request error: %s", err.Error()), http.StatusBadRequest)
-		return
+	if c.err = r.ParseForm(); c.err != nil {
+		return c
 	}
 	var pag *pagination
 	if pag = NewPagination(r); pag.err != nil {
-		http.Error(w, fmt.Sprintf("bad request error: %s", pag.err.Error()), http.StatusBadRequest)
+		c.err = pag.err
+		return c
+	}
+	c.pag = pag
+	return c
+}
+
+func getFirst(a *actors.PagerActor) (*MeasurementsResponse, error) {
+	msm, err := a.GetFirst()
+	if err != nil {
+		return nil, err
+	}
+	return &MeasurementsResponse{
+		First: msm,
+	}, nil
+}
+
+func getLast(a *actors.PagerActor) (*MeasurementsResponse, error) {
+	msm, err := a.GetLast()
+	if err != nil {
+		return nil, err
+	}
+	return &MeasurementsResponse{
+		Last: msm,
+	}, nil
+}
+
+func getPage(a *actors.PagerActor, pag *pagination) (*MeasurementsResponse, error) {
+	msm, err := a.GetPage(pag.page, pag.size)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MeasurementsResponse{
+		Measurements:         msm,
+		NumberOfMeasurements: len(msm),
+		FirstTime:            msm[0].Time,
+		LastTime:             msm[len(msm)-1].Time,
+	}, nil
+}
+
+func getAll(a *actors.PagerActor) (*MeasurementsResponse, error) {
+	msm, err := a.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	return &MeasurementsResponse{
+		Measurements:         msm,
+		NumberOfMeasurements: len(msm),
+		FirstTime:            msm[0].Time,
+		LastTime:             msm[len(msm)-1].Time,
+	}, nil
+
+}
+
+// ServeHTTP reads all entries from the local repo and returns the JSON.
+func (h *GetAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx := getContext(r)
+	if ctx.err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
-	var msm []*model.Measurement
+
+	var a = &actors.PagerActor{
+		Repo: h.server.localRepo,
+	}
+	var mr *MeasurementsResponse
 	var err error
-	if pag.paginate() {
-		msm, err = a.GetPage(pag.page, pag.size)
-	} else {
-		msm, err = a.GetAll()
+	switch {
+	case ctx.first:
+		mr, err = getFirst(a)
+	case ctx.last:
+		mr, err = getLast(a)
+	case ctx.pag != nil && ctx.pag.paginate():
+		mr, err = getPage(a, ctx.pag)
+	default:
+		mr, err = getAll(a)
 	}
 	// Get the data.
 	if err != nil {
 		http.Error(w, fmt.Sprintf("internal error: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
-	response := &MeasurementsResponse{
-		Measurements:         msm,
-		NumberOfMeasurements: len(msm),
-	}
-	if !pag.paginate() {
-		response.FirstTime = msm[0].Time
-		response.LastTime = msm[len(msm)-1].Time
-	}
 	// Content type
 	w.Header().Set("Content-Type", "application/json")
 	// Take the output and serialize to the writer.
-	j, err := json.Marshal(response)
+	j, err := json.Marshal(mr)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("internal error: %s", err.Error()), http.StatusInternalServerError)
 		return
