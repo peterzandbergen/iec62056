@@ -171,6 +171,7 @@ func getFirst(a *actors.PagerActor) (*MeasurementsResponse, error) {
 		log.Printf("Error retrieving the first element: %s", err.Error())
 		return nil, err
 	}
+	log.Printf("getFirst, First: %#v", *msm)
 	return &MeasurementsResponse{
 		First: msm,
 	}, nil
