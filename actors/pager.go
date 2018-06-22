@@ -2,6 +2,7 @@ package actors
 
 import (
 	"errors"
+	"log"
 
 	"github.com/peterzandbergen/iec62056/model"
 )
@@ -34,6 +35,7 @@ func (a *PagerActor) GetFirst() (*model.Measurement, error) {
 	var msm []*model.Measurement
 	var err error
 	if msm, err = a.Repo.GetAll(); err != nil {
+		log.Printf("PagerActor: error GetFirst: %s", err.Error())
 		return nil, err
 	}
 	return msm[0], nil
@@ -43,6 +45,7 @@ func (a *PagerActor) GetLast() (*model.Measurement, error) {
 	var msm []*model.Measurement
 	var err error
 	if msm, err = a.Repo.GetAll(); err != nil {
+		log.Printf("PagerActor: error GetLast: %s", err.Error())
 		return nil, err
 	}
 	return msm[len(msm)-1], nil
