@@ -250,6 +250,7 @@ func (h *GetAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Content type
 	w.Header().Set("Content-Type", "application/json")
 	// Take the output and serialize to the writer.
+	log.Printf("Get All Handler, result struct mr: %#v", *mr)
 	j, err := json.Marshal(mr)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("internal error: %s", err.Error()), http.StatusInternalServerError)
