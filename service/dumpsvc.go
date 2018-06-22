@@ -225,12 +225,16 @@ func (h *GetAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var err error
 	switch {
 	case ctx.first:
+		log.Print("GetAll: getFirst")
 		mr, err = getFirst(a)
 	case ctx.last:
+		log.Print("GetAll: getLast")
 		mr, err = getLast(a)
 	case ctx.pag != nil && ctx.pag.paginate():
+		log.Print("GetAll: getPage")
 		mr, err = getPage(a, ctx.pag)
 	default:
+		log.Print("GetAll: getAll")
 		mr, err = getAll(a)
 	}
 	// Get the data.
