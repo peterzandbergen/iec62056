@@ -30,12 +30,12 @@ type GetAllHandler struct {
 }
 
 type MeasurementsResponse struct {
-	FirstTime            time.Time `json:"omitempty"`
-	LastTime             time.Time `json:"omitempty"`
-	NumberOfMeasurements int
-	Measurements         []*model.Measurement
-	First                *model.Measurement `json:"omitempty"`
-	Last                 *model.Measurement `json:"omitempty"`
+	FirstTime            time.Time            `json:"omitempty"`
+	LastTime             time.Time            `json:"omitempty"`
+	NumberOfMeasurements int                  `json:"omitempty"`
+	Measurements         []*model.Measurement `json:"omitempty"`
+	First                *model.Measurement   `json:"omitempty"`
+	Last                 *model.Measurement   `json:"omitempty"`
 }
 
 type errPagination struct {
@@ -164,6 +164,11 @@ func getContext(r *http.Request) *requestContext {
 func getFirst(a *actors.PagerActor) (*MeasurementsResponse, error) {
 	msm, err := a.GetFirst()
 	if err != nil {
+		return nil, err
+	}
+	if msm == nil {
+		err := errors.New("dumpsvc.getFirst: unexpected nil result")
+		log.Printf("Error retrieving the first element: %s", err.Error())
 		return nil, err
 	}
 	return &MeasurementsResponse{
