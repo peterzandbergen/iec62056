@@ -2,6 +2,13 @@ package model
 
 import "time"
 
+var (
+	// First can be used in Get to get the first element from a repository.
+	First = "__first__"
+	// Last can be used in Get to get the first element from a repository.
+	Last = "__last__"
+)
+
 // MeasurementRepo interface should be implemented by adapters providing
 type MeasurementRepo interface {
 	Put(*Measurement) error

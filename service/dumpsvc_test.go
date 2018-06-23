@@ -177,7 +177,7 @@ const firstResponse = `{"First":{}}`
 
 func TestMeasurementResponseMarshal(t *testing.T) {
 	resp := &MeasurementsResponse{
-		First: &model.Measurement{
+		Data: &model.Measurement{
 			Identification: "identification",
 		},
 	}

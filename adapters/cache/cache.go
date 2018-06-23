@@ -65,7 +65,16 @@ func (c *Cache) Get(key []byte) (*model.Measurement, error) {
 	if c.db == nil {
 		return nil, ErrClosed
 	}
-	v, err := c.db.Get(key, nil)
+	var v []byte
+	var err error
+	switch string(key) {
+	case model.First:
+	case model.Last:
+		v, err = c.getFirstLast(string(key))
+	default:
+		v, err = c.db.Get(key, nil)
+	}
+	v, err = c.db.Get(key, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -94,6 +103,25 @@ func (c *Cache) GetAll() ([]*model.Measurement, error) {
 		}
 	}
 	return ms, nil
+}
+
+func (c *Cache) getFirstLast(fl string) ([]byte, error) {
+	it := c.db.NewIterator(nil, nil)
+	if it.Error() != nil {
+		return nil, it.Error()
+	}
+	defer it.Release()
+	var ok bool
+	switch fl {
+	case model.First:
+		ok = it.First()
+	case model.Last:
+		ok = it.Last()
+	}
+	if !ok {
+		return nil, it.Error()
+	}
+	return it.Value(), nil
 }
 
 // GetPage returns pagesize items from the given page. Page starts at 0.

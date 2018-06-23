@@ -30,12 +30,7 @@ type GetAllHandler struct {
 }
 
 type MeasurementsResponse struct {
-	FirstTime            time.Time            `json:",omitempty"`
-	LastTime             time.Time            `json:",omitempty"`
-	NumberOfMeasurements int                  `json:",omitempty"`
-	Measurements         []*model.Measurement `json:",omitempty"`
-	First                *model.Measurement   `json:",omitempty"`
-	Last                 *model.Measurement   `json:",omitempty"`
+	Data interface{} `json:",omitempty"`
 }
 
 type errPagination struct {
@@ -161,31 +156,18 @@ func getContext(r *http.Request) *requestContext {
 	return c
 }
 
-func getFirst(a *actors.PagerActor) (*MeasurementsResponse, error) {
-	msm, err := a.GetFirst()
+func get(a *actors.PagerActor, key string) (*MeasurementsResponse, error) {
+	msm, err := a.Get(key)
 	if err != nil {
 		return nil, err
 	}
 	if msm == nil {
-		err := errors.New("dumpsvc.getFirst: unexpected nil result")
-		log.Printf("Error retrieving the first element: %s", err.Error())
-		return nil, err
-	}
-	log.Printf("getFirst, First: %#v", *msm)
-	b, err := json.Marshal(msm)
-	log.Printf("getFirst json, First: %s", string(b))
-	return &MeasurementsResponse{
-		First: msm,
-	}, nil
-}
-
-func getLast(a *actors.PagerActor) (*MeasurementsResponse, error) {
-	msm, err := a.GetLast()
-	if err != nil {
+		err := errors.New("dumpsvc.get: unexpected nil result")
+		log.Printf("Error retrieving %s element: %s", key, err.Error())
 		return nil, err
 	}
 	return &MeasurementsResponse{
-		Last: msm,
+		Data: msm,
 	}, nil
 }
 
@@ -196,10 +178,7 @@ func getPage(a *actors.PagerActor, pag *pagination) (*MeasurementsResponse, erro
 	}
 
 	return &MeasurementsResponse{
-		Measurements:         msm,
-		NumberOfMeasurements: len(msm),
-		FirstTime:            msm[0].Time,
-		LastTime:             msm[len(msm)-1].Time,
+		Data: msm,
 	}, nil
 }
 
@@ -210,10 +189,7 @@ func getAll(a *actors.PagerActor) (*MeasurementsResponse, error) {
 	}
 
 	return &MeasurementsResponse{
-		Measurements:         msm,
-		NumberOfMeasurements: len(msm),
-		FirstTime:            msm[0].Time,
-		LastTime:             msm[len(msm)-1].Time,
+		Data: msm,
 	}, nil
 
 }
@@ -234,10 +210,10 @@ func (h *GetAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case ctx.first:
 		log.Print("GetAll: getFirst")
-		mr, err = getFirst(a)
+		mr, err = get(a, model.First)
 	case ctx.last:
 		log.Print("GetAll: getLast")
-		mr, err = getLast(a)
+		mr, err = get(a, model.Last)
 	case ctx.pag != nil && ctx.pag.paginate():
 		log.Print("GetAll: getPage")
 		mr, err = getPage(a, ctx.pag)

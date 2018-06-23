@@ -31,24 +31,12 @@ func (a *PagerActor) GetAll() ([]*model.Measurement, error) {
 	return a.Repo.GetAll()
 }
 
-func (a *PagerActor) GetFirst() (*model.Measurement, error) {
-	var msm []*model.Measurement
+func (a PagerActor) Get(fl string) (*model.Measurement, error) {
+	var msm *model.Measurement
 	var err error
-	if msm, err = a.Repo.GetAll(); err != nil {
-		log.Printf("PagerActor: error GetFirst: %s", err.Error())
+	if msm, err = a.Repo.Get([]byte(fl)); err != nil {
+		log.Printf("PagerActor: error GetFirstLast: %s", err.Error())
 		return nil, err
 	}
-	log.Printf("GetFirst, retrieved %d elements, returning the %d th element.", len(msm), 0)
-	return msm[0], nil
-}
-
-func (a *PagerActor) GetLast() (*model.Measurement, error) {
-	var msm []*model.Measurement
-	var err error
-	if msm, err = a.Repo.GetAll(); err != nil {
-		log.Printf("PagerActor: error GetLast: %s", err.Error())
-		return nil, err
-	}
-	log.Printf("GetLast, retrieved %d elements, returning the %d th element.", len(msm), len(msm)-1)
-	return msm[len(msm)-1], nil
+	return msm, nil
 }
