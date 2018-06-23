@@ -68,8 +68,7 @@ func (c *Cache) Get(key []byte) (*model.Measurement, error) {
 	var v []byte
 	var err error
 	switch string(key) {
-	case model.First:
-	case model.Last:
+	case model.First, model.Last:
 		v, err = c.getFirstLast(string(key))
 	default:
 		v, err = c.db.Get(key, nil)
