@@ -74,7 +74,6 @@ func (c *Cache) Get(key []byte) (*model.Measurement, error) {
 	default:
 		v, err = c.db.Get(key, nil)
 	}
-	v, err = c.db.Get(key, nil)
 	if err != nil {
 		return nil, err
 	}
