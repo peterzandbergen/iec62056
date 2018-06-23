@@ -30,12 +30,12 @@ type GetAllHandler struct {
 }
 
 type MeasurementsResponse struct {
-	FirstTime            time.Time            `json:"omitempty"`
-	LastTime             time.Time            `json:"omitempty"`
-	NumberOfMeasurements int                  `json:"omitempty"`
-	Measurements         []*model.Measurement `json:"omitempty"`
-	First                *model.Measurement   `json:"omitempty"`
-	Last                 *model.Measurement   `json:"omitempty"`
+	FirstTime            time.Time            `json:",omitempty"`
+	LastTime             time.Time            `json:",omitempty"`
+	NumberOfMeasurements int                  `json:",omitempty"`
+	Measurements         []*model.Measurement `json:",omitempty"`
+	First                *model.Measurement   `json:",omitempty"`
+	Last                 *model.Measurement   `json:",omitempty"`
 }
 
 type errPagination struct {
@@ -172,6 +172,8 @@ func getFirst(a *actors.PagerActor) (*MeasurementsResponse, error) {
 		return nil, err
 	}
 	log.Printf("getFirst, First: %#v", *msm)
+	b, err := json.Marshal(msm)
+	log.Printf("getFirst json, First: %s", string(b))
 	return &MeasurementsResponse{
 		First: msm,
 	}, nil
@@ -251,7 +253,7 @@ func (h *GetAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Content type
 	w.Header().Set("Content-Type", "application/json")
 	// Take the output and serialize to the writer.
-	log.Printf("Get All Handler, result struct mr: %#v", *mr)
+	// log.Printf("Get All Handler, result struct mr: %#v", *mr)
 	j, err := json.Marshal(mr)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("internal error: %s", err.Error()), http.StatusInternalServerError)

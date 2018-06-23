@@ -1,8 +1,11 @@
 package service
 
 import (
+	"encoding/json"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/peterzandbergen/iec62056/model"
 )
 
 func TestAllRequest(t *testing.T) {
@@ -167,5 +170,20 @@ func TestContextPaginate(t *testing.T) {
 	}
 	if c.pag.size != 200 {
 		t.Error("size != 200")
+	}
+}
+
+const firstResponse = `{"First":{}}`
+
+func TestMeasurementResponseMarshal(t *testing.T) {
+	resp := &MeasurementsResponse{
+		First: &model.Measurement{
+			Identification: "identification",
+		},
+	}
+	js, err := json.Marshal(resp)
+	if err == nil {
+		t.Log(string(js))
+		// t.Error()
 	}
 }
