@@ -1,2 +1,4 @@
 adapters/cache/.testdb
 debug.test
+cmd/emlog/.emlog-cache
+cmd/emlog/*.exe
