@@ -16,17 +16,19 @@ import (
 )
 
 var (
+	// ErrBadParameter returned for bad parameters
 	ErrBadParameter = errors.New("parameter error")
 )
 
-type HttpLocalService struct {
+// HTTPLocalService services requests for the local measurement cache
+type HTTPLocalService struct {
 	listenAddress string
 	localRepo     model.MeasurementRepo
 	server        *http.Server
 }
 
 type GetAllHandler struct {
-	server *HttpLocalService
+	server *HTTPLocalService
 }
 
 type MeasurementsResponse struct {
@@ -96,7 +98,7 @@ func (p *pagination) paginate() bool {
 
 func NewHttpLocalService(address string, repo model.MeasurementRepo) Service {
 	sm := &http.ServeMux{}
-	svc := &HttpLocalService{
+	svc := &HTTPLocalService{
 		listenAddress: address,
 		localRepo:     repo,
 		server: &http.Server{
@@ -241,7 +243,7 @@ func (h *GetAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // Start starts the HTTP server on the given address and port.
-func (s *HttpLocalService) Start(ctx context.Context) error {
+func (s *HTTPLocalService) Start(ctx context.Context) error {
 	var err error
 	var done = make(chan struct{})
 	go func() {
@@ -256,7 +258,7 @@ func (s *HttpLocalService) Start(ctx context.Context) error {
 	}
 }
 
-func (s *HttpLocalService) Stop(ctx context.Context) error {
+func (s *HTTPLocalService) Stop(ctx context.Context) error {
 	if err := s.server.Shutdown(ctx); err != nil {
 		return err
 	}

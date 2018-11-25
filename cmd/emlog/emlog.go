@@ -9,13 +9,12 @@ import (
 	"time"
 
 	"github.com/peterzandbergen/iec62056/model"
-
 	"github.com/peterzandbergen/iec62056/adapters/meter"
-
 	"github.com/peterzandbergen/iec62056/actors"
 	"github.com/peterzandbergen/iec62056/adapters/cache"
 	"github.com/peterzandbergen/iec62056/iec"
 	"github.com/peterzandbergen/iec62056/service"
+	
 	"github.com/spf13/pflag"
 )
 
