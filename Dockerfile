@@ -4,15 +4,13 @@ WORKDIR /build
 
 COPY . .
 
-WORKDIR /build/iec62056
-
 RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -v cmd/emlog/*.go
 
 FROM scratch
 
 WORKDIR /app
 
-COPY --from=builder /build/iec62056/emlog /app/emlog
+COPY --from=builder /build/emlog /app/emlog
 
-CMD [ "/app/emlog" ]
+ENTRYPOINT [ "/app/emlog" ]
 
