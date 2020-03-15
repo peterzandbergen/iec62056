@@ -42,7 +42,7 @@ type Port struct {
 	r *bufio.Reader
 }
 
-// newDefaulSettings returns portsettings with default settings.
+// NewDefaulSettings returns portsettings with default settings.
 func NewDefaultSettings() *PortSettings {
 	return &PortSettings{
 		BaudRateChangeDelay:    0,

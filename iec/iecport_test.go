@@ -11,7 +11,7 @@ import (
 )
 
 func TestNewPort(t *testing.T) {
-	var settings = newDefaulSettings()
+	var settings = NewDefaultSettings()
 	port := New(settings)
 	if port.BaudRateChangeDelay != 0 {
 		t.Errorf("port.BaudRateChangeDelay, expected %d, received %d", 0, port.BaudRateChangeDelay)
@@ -31,7 +31,7 @@ func TestNewPort(t *testing.T) {
 }
 
 func TestPortOpen(t *testing.T) {
-	p := New(newDefaulSettings())
+	p := New(NewDefaultSettings())
 
 	err := p.Open("/dev/ttyUSB0")
 	if err != nil {
@@ -41,7 +41,7 @@ func TestPortOpen(t *testing.T) {
 }
 
 func TestReadIdentificationMessage(t *testing.T) {
-	p := New(newDefaulSettings())
+	p := New(NewDefaultSettings())
 
 	err := p.Open("/dev/ttyUSB0")
 	if err != nil {
@@ -72,7 +72,7 @@ func TestReadIdentificationMessage(t *testing.T) {
 }
 
 func TestReadDataMessage(t *testing.T) {
-	p := New(newDefaulSettings())
+	p := New(NewDefaultSettings())
 
 	err := p.Open("/dev/ttyUSB0")
 	if err != nil {
@@ -103,7 +103,7 @@ func TestReadDataMessage(t *testing.T) {
 }
 
 func TestReadResponse(t *testing.T) {
-	p := New(newDefaulSettings())
+	p := New(NewDefaultSettings())
 
 	err := p.Open("/dev/ttyUSB0")
 	if err != nil {
