@@ -10,3 +10,5 @@ require (
 	go.bug.st/serial.v1 v0.0.0-20180827123349-5f7892a7bb45
 	golang.org/x/sys v0.0.0-20181122145206-62eef0e2fa9b // indirect
 )
+
+go 1.13
