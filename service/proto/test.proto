@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = ".;proto";
+
+import "google/protobuf/timestamp.proto";
+
+message GetMeasurementsRequest {
+    string device = 1;
+
+    google.protobuf.Timestamp from = 10;
+    google.protobuf.Timestamp to = 11;
+}
+
+message GetMeasurementsResponse {
+    string device = 1;
+
+    google.protobuf.Timestamp from = 10;
+    google.protobuf.Timestamp to = 11;
+}
+
+message VoidRequest {}
+message GetMeasurementResponse {}
+
+service MeasurementService {
+    rpc GetMeasurements(stream GetMeasurementsRequest) returns (stream GetMeasurementsResponse);
+    rpc GetLastMeasurement(VoidRequest) returns (GetMeasurementResponse);
+    rpc GetFirstMeasurement(VoidRequest) returns (GetMeasurementResponse);
+}
