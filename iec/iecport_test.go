@@ -99,7 +99,7 @@ func TestReadDataMessage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error receiving idenfication message: %s", err.Error())
 	}
-	t.Logf("Identicatin message: %s", dm.String())
+	t.Logf("idenfication message: %s", dm.String())
 }
 
 func TestReadResponse(t *testing.T) {

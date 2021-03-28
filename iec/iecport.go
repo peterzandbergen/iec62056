@@ -97,6 +97,38 @@ func (p *Port) Close() {
 	p.r = nil
 }
 
+func readAckResponse(r *bufio.Reader) (*DataMessage, error) {
+	// Wait for the Identification Message.
+	im, err := telegram.ParseIdentificationMessage(r)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: Send ACK
+	
+
+
+	// Wait for the Data.
+	dm, err := telegram.ParseDataMessage(r)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &DataMessage{
+		ManufacturerID: im.ManID,
+		MeterID:        im.Identification,
+	}
+	for _, m := range *dm.DataSets {
+		var s = DataSet{
+			Address: m.Address,
+			Value:   m.Value,
+			Unit:    m.Unit,
+		}
+		res.DataSets = append(res.DataSets, s)
+	}
+	return res, nil
+}
+
 func readImmediateResponse(r *bufio.Reader) (*DataMessage, error) {
 	// Wait for the Identification Message.
 	im, err := telegram.ParseIdentificationMessage(r)
