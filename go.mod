@@ -1,6 +1,7 @@
 module github.com/peterzandbergen/iec62056
 
 require (
+	github.com/augustoroman/hexdump v0.0.0-20190827031536-6506f4163e93
 	github.com/creack/goselect v0.0.0-20180501195510-58854f77ee8d // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/onsi/ginkgo v1.7.0 // indirect

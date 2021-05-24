@@ -9,8 +9,10 @@ import (
 	"time"
 	"bytes"
 
-	"github.com/peterzandbergen/iec62056/iec/telegram"
+	"github.com/augustoroman/hexdump"
 	"go.bug.st/serial.v1"
+
+	"github.com/peterzandbergen/iec62056/iec/telegram"
 )
 
 func readCommands(wg *sync.WaitGroup, in io.Reader, p io.Writer) {
@@ -87,6 +89,12 @@ func writeHexResponses(wg *sync.WaitGroup, in *bufio.Reader, out io.Writer) {
 	}
 }
 
+func writeHexLineResponses(wg *sync.WaitGroup, in *bufio.Reader, out io.Writer) {
+	defer wg.Done()
+
+	hexdump.Config{}.Stream(in, out)
+}
+
 func writeLineResponses(wg *sync.WaitGroup, in *bufio.Reader, out io.Writer) {
 	defer wg.Done()
 	for {
@@ -123,7 +131,8 @@ func main() {
 	go readCommands(wg, os.Stdin, p)
 	// go writeResponses(wg, br, os.Stdout)
 	// go writeHexResponses(wg, br, os.Stdout)
-	go writeLineResponses(wg, br, os.Stdout)
+	// go writeLineResponses(wg, br, os.Stdout)
+	go writeHexLineResponses(wg, br, os.Stdout)
 	p.SetRTS(false)
 	// p.SetDTR(true)
 	wg.Wait()

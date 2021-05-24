@@ -1,3 +1,5 @@
+github.com/augustoroman/hexdump v0.0.0-20190827031536-6506f4163e93 h1:z6k1vb5L2wqLK4SIk3fpUiXnhNWSZ6Oyy8AaLqr0B+A=
+github.com/augustoroman/hexdump v0.0.0-20190827031536-6506f4163e93/go.mod h1:ps2Vk8wMZarkeIPtUqW/FUvwVVdeRDbewMYz+EmuEgk=
 github.com/creack/goselect v0.0.0-20180501195510-58854f77ee8d h1:6o8WW5zZ+Ny9sbk69epnAPmBzrBaRnvci+l4+pqleeY=
 github.com/creack/goselect v0.0.0-20180501195510-58854f77ee8d/go.mod h1:gHrIcH/9UZDn2qgeTUeW5K9eZsVYCH6/60J/FHysWyE=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=
