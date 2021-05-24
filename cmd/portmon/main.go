@@ -96,7 +96,7 @@ func writeHexLineResponses(wg *sync.WaitGroup, in *bufio.Reader, out io.Writer) 
 	}
 	b := make([]byte, cfg.Width)
 	for {
-		n, err := in.Read(b)
+		n, err := io.ReadAtLeast(in, b, len(b))
 		if err != nil {
 			return
 		}
