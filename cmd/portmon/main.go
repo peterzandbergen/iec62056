@@ -91,8 +91,17 @@ func writeHexResponses(wg *sync.WaitGroup, in *bufio.Reader, out io.Writer) {
 
 func writeHexLineResponses(wg *sync.WaitGroup, in *bufio.Reader, out io.Writer) {
 	defer wg.Done()
-
-	hexdump.Config{}.Stream(in, out)
+	cfg := hexdump.Config{
+		Width: 32,
+	}
+	b := make([]byte, cfg.Width)
+	for {
+		n, err := in.Read(b)
+		if err != nil {
+			return
+		}
+		out.Write([]byte(cfg.Dump(b[:n])))
+	}
 }
 
 func writeLineResponses(wg *sync.WaitGroup, in *bufio.Reader, out io.Writer) {
